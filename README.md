@@ -1,38 +1,57 @@
-# kitchenguard-web
+# 🍎 kitchenguard-web
 
-This template should help get you started developing with Vue 3 in Vite.
+## 📋 Tabla de Contenidos
 
-## Recommended IDE Setup
+## 📌 Descripción General
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## ✨ Características
 
-## Recommended Browser Setup
+### 🕐 Reloj
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+### ⏱️ Cronómetro
 
-## Customize configuration
+### 🔥 Alarma de Incendio
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+## 🏗️ Arquitectura del Sistema
 
-## Project Setup
+## ⚙️ Componentes de Hardware
 
-```sh
-npm install
-```
+## 🛠️ Tecnologías Utilizadas
 
-### Compile and Hot-Reload for Development
+### Hardware / Firmware
 
-```sh
-npm run dev
-```
+### Backend / API
 
-### Compile and Minify for Production
+### Aplicación Web
 
-```sh
-npm run build
-```
+### Aplicación Móvil
+
+## 📁 Estructura del Proyecto
+
+## 🚀 Instalación y Configuración
+
+### Pre-requisitos
+
+### Clonar el repositorio
+
+### Configuración del Hardware
+
+### Configuración del Backend
+
+### Configuración Web
+
+### Configuración Móvil
+
+## 📖 Uso
+
+## 🔌 API / Comunicación
+
+## 📱 Aplicación Móvil
+
+## 🌐 Aplicación Web
+
+## 🤝 Contribución
+
+## 👥 Equipo
+
+## 📄 Licencia
