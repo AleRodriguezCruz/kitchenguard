@@ -5,7 +5,7 @@
 > **Sistema Inteligente de Seguridad y Temporización para el Hogar** 
 
 > Proyecto de Innovación — Servidores Web en Linux
-> Tecnológico Nacional de México · Instituto Tecnológico de Ensenada
+> - Tecnológico Nacional de México - Instituto Tecnológico de Ensenada
 
 - [📌 Descripción General](#-descripción-general)
 - [✨ Características](#-características)
@@ -35,7 +35,7 @@ Integra un sensor fisico, procesamiento en servidor Linux y aplicaciones cliente
 
 ### ⏱️ Cronómetro
 - Multiples temporizadores configurables.
-- Notificación al finaliza.
+- Notificación al finalizar.
 
 ### 🔥 Alarma de Incendio
 - Detección mediante sensor MQ-4.
@@ -85,15 +85,15 @@ Integra un sensor fisico, procesamiento en servidor Linux y aplicaciones cliente
 
 (Aun pueden haber modificaciones en esta parte)
 
-KitchenGuard/ 
-│ 
-├── backend/ 
-├── frontend-web/ 
-├── frontend-mobile/ 
-├── iot/ 
-├── database/ 
-├── docs/ 
-└── README.md
+KitchenGuard/
+│
+├── backend/           # API, lógica del servidor y servicios
+├── frontend-web/      # Aplicación web 
+├── frontend-mobile/   # Aplicación móvil 
+├── iot/               # Código para dispositivos 
+├── database/          # Scripts, esquemas y migraciones de base de datos
+├── docs/              # Documentación del proyecto
+└── README.md          # Documentación principal
 
 ## 🚀 Instalación y Configuración
 
