@@ -23,6 +23,10 @@
 
 ## 📌 Descripción General
 
+**KitchenGuard** es un sistema domotico inteligente diseñado para mejorar la seguridad en el hogar, especialmente en la cocina.
+
+Integra un sensor fisico, procesamiento en servidor Linux y aplicaciones cliente (web y móvil) para detectar riesgos de fuga de gas LP, altas temperaturas o emergencias (botón de pánico), enviando alertas en tiempo real al usuario.
+
 ## ✨ Características
 
 ### 🕐 Reloj
