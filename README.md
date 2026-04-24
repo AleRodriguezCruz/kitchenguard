@@ -85,6 +85,7 @@ Integra un sensor fisico, procesamiento en servidor Linux y aplicaciones cliente
 
 (Aun pueden haber modificaciones en esta parte)
 
+```text
 KitchenGuard/
 │
 ├── backend/           # API, lógica del servidor y servicios
@@ -94,7 +95,7 @@ KitchenGuard/
 ├── database/          # Scripts, esquemas y migraciones de base de datos
 ├── docs/              # Documentación del proyecto
 └── README.md          # Documentación principal
-
+```
 ## 🚀 Instalación y Configuración
 
 ### Pre-requisitos
