@@ -3,6 +3,7 @@
 ## 📋 Tabla de Contenidos
 
 > **Sistema Inteligente de Seguridad y Temporización para el Hogar** 
+
 > Proyecto de Innovación — Servidores Web en Linux
 > Tecnológico Nacional de México · Instituto Tecnológico de Ensenada
 
@@ -30,12 +31,28 @@ Integra un sensor fisico, procesamiento en servidor Linux y aplicaciones cliente
 ## ✨ Características
 
 ### 🕐 Reloj
+- Hora en tiempo real.
 
 ### ⏱️ Cronómetro
+- Multiples temporizadores configurables.
+- Notificación al finaliza.
 
 ### 🔥 Alarma de Incendio
+- Detección mediante sensor MQ-4.
+- Alerta en tiempo real.
+
+### 🚨 Botón de Pánico
+- Activado manual de alerta.
+- Noficación de alerta.
+
+### 🌐 Monitoreo Remoto
+- Acceso desde aplicación Web.
+- Acceso desde app móvil
 
 ## 🏗️ Arquitectura del Sistema
+1. **IoT - ESP32 (Local):** Lectura de sensores, es decir, recolección y envío de datos al servidor.
+2. **Servidor (Raspberry Pi / Linux):** Gestión de la BD, API REST, procesamiento de datos, mediante el Servidor.
+3. **Client (UI):** Aplicación web (vue.js) y aplicación movil (React Native), consumen los datos en tiempo real.
 
 ## ⚙️ Componentes de Hardware
 
