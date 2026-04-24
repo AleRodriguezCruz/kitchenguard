@@ -1,7 +1,7 @@
 # 🍎 kitchenguard
 
 > Proyecto de Innovación — Servidores Web en Linux
-> - Tecnológico Nacional de México - Instituto Tecnológico de Ensenada
+> ##### Tecnológico Nacional de México - Instituto Tecnológico de Ensenada
 
 ## 📋 Tabla de Contenidos
 
@@ -18,9 +18,7 @@
 - [🔌 API / Comunicación](#-api--comunicación)
 - [📱 Aplicación Móvil](#-aplicación-móvil)
 - [🌐 Aplicación Web](#-aplicación-web)
-- [🤝 Contribución](#-contribución)
-- [👥 Equipo](#-equipo)
-- [📄 Licencia](#-licencia)
+- [👥 Desarrolladoras](#-desarrolladoras)
 
 ## 📌 Descripción General
 
@@ -60,8 +58,8 @@ Integra un sensor fisico, procesamiento en servidor Linux y aplicaciones cliente
 - ESP32.
 - Sensor de gas MQ-4.
 - Sensor de temperatura. (pendiente id)
-- Dos Botónes.
-- Un LED.
+- Botones.
+- LED.
 - Cables y protoboard.
 
 ## 🛠️ Tecnologías Utilizadas
@@ -195,7 +193,6 @@ La interfaz web desarrollada en **Vue.js 3 + JavaScript + Vite** permite:
 - 🕐 **Reloj en tiempo real**
 - ⏱️ **Gestión de temporizadores** 
 - 📡 **Panel de sensores** 
-- 📊 **Gráficas de historial** 
 - 🔔 **Alertas visuales** 
 - 📜 **Historial de eventos** 
 - 📱 **Diseño responsivo** 
