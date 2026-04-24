@@ -180,24 +180,24 @@ cd kitchenguard
 ## 📱 Aplicación Móvil
 La app móvil desarrollada en **React Native + Expo** ofrece:
  
-- 📊 **Dashboard** 
-- ⏱️ **Temporizadores** 
-- 🔔 **Notificaciones push** 
-- 📜 **Historial** 
-- 🚨 **Alerta visual** 
+- 📊 **Dashboard.** 
+- ⏱️ **Temporizadores.** 
+- 🔔 **Notificaciones push.** 
+- 📜 **Historial.** 
+- 🚨 **Alerta visual.** 
 
 ## 🌐 Aplicación Web
 
 La interfaz web desarrollada en **Vue.js 3 + JavaScript + Vite** permite:
  
-- 🕐 **Reloj en tiempo real**
-- ⏱️ **Gestión de temporizadores** 
-- 📡 **Panel de sensores** 
-- 🔔 **Alertas visuales** 
-- 📜 **Historial de eventos** 
-- 📱 **Diseño responsivo** 
+- 🕐 **Reloj en tiempo real.**
+- ⏱️ **Gestión de temporizadores.** 
+- 📡 **Panel de sensores.** 
+- 🔔 **Alertas visuales.** 
+- 📜 **Historial de eventos.** 
+- 📱 **Diseño responsivo.** 
 
 ## 👥 Equipo
-- Mayon Flor
-- Rodríguez Alejandra
+- Mayon Flor.
+- Rodríguez Alejandra.
 
