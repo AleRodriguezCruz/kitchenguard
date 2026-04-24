@@ -56,25 +56,44 @@ Integra un sensor fisico, procesamiento en servidor Linux y aplicaciones cliente
 
 ## ⚙️ Componentes de Hardware
 
-- Raspberry Pi 3B.
+- Raspberry Pi 3B + pantalla.
 - ESP32.
 - Sensor de gas MQ-4.
 - Sensor de temperatura. (pendiente id)
 - Un Botón.
 - Un LED.
-- Pantalla LCD.
+- Cables y protoboard.
 
 ## 🛠️ Tecnologías Utilizadas
 
 ### Hardware / Firmware
-
+- ESP32 (C++/ARDUINO).
 ### Backend / API
-
+- Sistema operativo Ubuntu Server.
+- Python.
+- Flask.
+- SQLite.
 ### Aplicación Web
-
+- Javascript (+ Vue.js, Composition API).
+- HTML.
+- CSS.
 ### Aplicación Móvil
+- React Native.
+- Entorno de de desarrollo Expo.
 
 ## 📁 Estructura del Proyecto
+
+(Aun pueden haber modificaciones en esta parte)
+
+KitchenGuard/ 
+│ 
+├── backend/ 
+├── frontend-web/ 
+├── frontend-mobile/ 
+├── iot/ 
+├── database/ 
+├── docs/ 
+└── README.md
 
 ## 🚀 Instalación y Configuración
 
