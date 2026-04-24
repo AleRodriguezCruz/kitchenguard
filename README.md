@@ -60,7 +60,7 @@ Integra un sensor fisico, procesamiento en servidor Linux y aplicaciones cliente
 - ESP32.
 - Sensor de gas MQ-4.
 - Sensor de temperatura. (pendiente id)
-- Un Botón.
+- Dos Botónes.
 - Un LED.
 - Cables y protoboard.
 
@@ -157,8 +157,27 @@ cd kitchenguard
 #Escanear QR con la app Expo Go.
 
 ## 📖 Uso
+- 1.- Encender el sistema (Raspberry Pi + ESP32).
+- 2.- Abrir aplicación web o móvil.
+- 3.- Monitorear sensores en tiempo real.
+- 4.- Configurar temporizadores.
+- 5.- Presión de botón de pánico en caso necesario.
+- 5.- Recibir alertas en caso de riesgo.
 
 ## 🔌 API / Comunicación
+
+(en actualización)
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `GET` | `/sensors/status` | Estado actual de temperatura y gas |
+| `POST` | `/sensors/data` | Recibir datos del ESP32/Raspberry |
+| `GET` | `/timers` | Listar todos los temporizadores activos |
+| `POST` | `/timers` | Crear nuevo temporizador |
+| `DELETE` | `/timers/:id` | Eliminar temporizador |
+| `GET` | `/events` | Historial de eventos y alertas |
+| `POST` | `/alerts/panic` | Disparar alerta de pánico |
+| `GET` | `/clock` | Hora actual del servidor (NTP) |
 
 ## 📱 Aplicación Móvil
 
