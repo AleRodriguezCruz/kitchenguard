@@ -128,14 +128,14 @@ cd kitchenguard
 ```
 
 ### Configuración Web
-- 1.- ```bash  cd frontend-web ```
-- 2.- ```bash npm install ```
+- 1.- ```cd frontend-web ```
+- 2.- ```npm install ```
 - 3.- ```bash  npm run dev ```
 
 ### Configuración Móvil
-- 1.- ```bash cd frontend-mobile ```
-- 2.- ```bash npm install ```
-- 3.- ```bash npx expo start ``` #Escanear QR con la app Expo Go.
+- 1.- ```cd frontend-mobile ```
+- 2.- ```npm install ```
+- 3.- ```npx expo start ``` #Escanear QR con la app Expo Go.
 
 ## 📖 Uso
 
