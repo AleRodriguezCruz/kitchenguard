@@ -1,6 +1,25 @@
-# 🍎 kitchenguard-web
+# 🍎 kitchenguard
 
 ## 📋 Tabla de Contenidos
+
+> **Sistema Inteligente de Seguridad y Temporización para el Hogar** 
+> Proyecto de Innovación — Servidores Web en Linux
+> Tecnológico Nacional de México · Instituto Tecnológico de Ensenada
+
+- [📌 Descripción General](#-descripción-general)
+- [✨ Características](#-características)
+- [🏗️ Arquitectura del Sistema](#️-arquitectura-del-sistema)
+- [⚙️ Componentes de Hardware](#️-componentes-de-hardware)
+- [🛠️ Tecnologías Utilizadas](#️-tecnologías-utilizadas)
+- [📁 Estructura del Proyecto](#-estructura-del-proyecto)
+- [🚀 Instalación y Configuración](#-instalación-y-configuración)
+- [📖 Uso](#-uso)
+- [🔌 API / Comunicación](#-api--comunicación)
+- [📱 Aplicación Móvil](#-aplicación-móvil)
+- [🌐 Aplicación Web](#-aplicación-web)
+- [🤝 Contribución](#-contribución)
+- [👥 Equipo](#-equipo)
+- [📄 Licencia](#-licencia)
 
 ## 📌 Descripción General
 
