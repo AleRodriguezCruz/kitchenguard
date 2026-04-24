@@ -47,7 +47,7 @@ Integra un sensor fisico, procesamiento en servidor Linux y aplicaciones cliente
 
 ### 🌐 Monitoreo Remoto
 - Acceso desde aplicación Web.
-- Acceso desde app móvil
+- Acceso desde app móvil.
 
 ## 🏗️ Arquitectura del Sistema
 1. **IoT - ESP32 (Local):** Lectura de sensores, es decir, recolección y envío de datos al servidor.
@@ -55,6 +55,14 @@ Integra un sensor fisico, procesamiento en servidor Linux y aplicaciones cliente
 3. **Client (UI):** Aplicación web (vue.js) y aplicación movil (React Native), consumen los datos en tiempo real.
 
 ## ⚙️ Componentes de Hardware
+
+- Raspberry Pi 3B.
+- ESP32.
+- Sensor de gas MQ-4.
+- Sensor de temperatura. (pendiente id)
+- Un Botón.
+- Un LED.
+- Pantalla LCD.
 
 ## 🛠️ Tecnologías Utilizadas
 
