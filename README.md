@@ -18,9 +18,7 @@
 - [🔌 API / Comunicación](#-api--comunicación)
 - [📱 Aplicación Móvil](#-aplicación-móvil)
 - [🌐 Aplicación Web](#-aplicación-web)
-- [🤝 Contribución](#-contribución)
 - [👥 Equipo](#-equipo)
-- [📄 Licencia](#-licencia)
 
 ## 📌 Descripción General
 
@@ -612,8 +610,6 @@ La interfaz web desarrollada en **Vue.js 3 + JavaScript + Vite** permite:
 - 📜 **Historial de eventos** 
 - 📱 **Diseño responsivo** 
 
-## 🤝 Contribución
-
 ## 👥 Equipo
-
-## 📄 Licencia
+- Mayon Cisneros Flor Jazmín
+- Rodríguez de la Cruz Alejandra
