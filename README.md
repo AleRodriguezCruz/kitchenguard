@@ -128,14 +128,33 @@ cd kitchenguard
 ```
 
 ### Configuración Web
-- 1.- ```cd frontend-web ```
-- 2.- ```npm install ```
-- 3.- ```bash  npm run dev ```
+- 1.- Entrar a la carpeta: 
+``` bash 
+    cd frontend-web 
+```
+- 2.- Instalar dependencias: 
+``` bash
+    npm install 
+```
+- 3.- Inicializar: 
+```bash  
+    npm run dev 
+```
 
 ### Configuración Móvil
-- 1.- ```cd frontend-mobile ```
-- 2.- ```npm install ```
-- 3.- ```npx expo start ``` #Escanear QR con la app Expo Go.
+- 1.-Entrar a la carpeta: 
+``` bash 
+    cd frontend-mobile 
+```
+- 2.- Instalar dependencias: 
+``` bash
+    npm install 
+```
+- 3.- Inicializar: 
+```bash 
+    npx expo start 
+``` 
+#Escanear QR con la app Expo Go.
 
 ## 📖 Uso
 
