@@ -1,11 +1,11 @@
 # 🍎 kitchenguard
 
+> Proyecto de Innovación — Servidores Web en Linux
+> - Tecnológico Nacional de México - Instituto Tecnológico de Ensenada
+
 ## 📋 Tabla de Contenidos
 
 > **Sistema Inteligente de Seguridad y Temporización para el Hogar** 
-
-> Proyecto de Innovación — Servidores Web en Linux
-> - Tecnológico Nacional de México - Instituto Tecnológico de Ensenada
 
 - [📌 Descripción General](#-descripción-general)
 - [✨ Características](#-características)
