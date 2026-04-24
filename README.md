@@ -98,16 +98,43 @@ KitchenGuard/
 ## 🚀 Instalación y Configuración
 
 ### Pre-requisitos
+- Servidor Linux (Ubuntu 20.04+).
+- Python 3.12+.
+- Node.js.
+- Expo Go.
+- Arduino IDE para el ESP32.
+- Raspberry Pi 3B.
 
 ### Clonar el repositorio
 
-### Configuración del Hardware
+```bash
+git clone https://github.com/AleRodriguezCruz/kitchenguard.git
+cd kitchenguard
+```
 
 ### Configuración del Backend
+1.- Crear entorno virtual: 
+```bash 
+    python -m venv venv.
+```
+2.- Instalar dependencias:
+```bash 
+    pip install -r requirements.txt
+```
+3.- Iniciar servidor:
+```bash 
+    python app.py
+```
 
 ### Configuración Web
+1.- cd frontend-web
+2.- npm install
+3.- npm run dev
 
 ### Configuración Móvil
+1.- cd frontend-mobile 
+2.- npm install 
+3.- npx expo start #Escanear QR con la app Expo Go.
 
 ## 📖 Uso
 
