@@ -128,41 +128,41 @@ cd kitchenguard
 ```
 
 ### Configuración Web
-- 1.- Entrar a la carpeta: 
+#### 1.- Entrar a la carpeta: 
 ``` bash 
     cd frontend-web 
 ```
-- 2.- Instalar dependencias: 
+#### 2.- Instalar dependencias: 
 ``` bash
     npm install 
 ```
-- 3.- Inicializar: 
+#### 3.- Inicializar: 
 ```bash  
     npm run dev 
 ```
 
 ### Configuración Móvil
-- 1.-Entrar a la carpeta: 
+#### 1.-Entrar a la carpeta: 
 ``` bash 
     cd frontend-mobile 
 ```
-- 2.- Instalar dependencias: 
+#### 2.- Instalar dependencias: 
 ``` bash
     npm install 
 ```
-- 3.- Inicializar: 
+#### 3.- Inicializar: 
 ```bash 
     npx expo start 
 ``` 
 #Escanear QR con la app Expo Go.
 
 ## 📖 Uso
-- 1.- Encender el sistema (Raspberry Pi + ESP32).
-- 2.- Abrir aplicación web o móvil.
-- 3.- Monitorear sensores en tiempo real.
-- 4.- Configurar temporizadores.
-- 5.- Presión de botón de pánico en caso necesario.
-- 5.- Recibir alertas en caso de riesgo.
+#### 1.- Encender el sistema (Raspberry Pi + ESP32).
+#### 2.- Abrir aplicación web o móvil.
+#### 3.- Monitorear sensores en tiempo real.
+#### 4.- Configurar temporizadores.
+#### 5.- Presión de botón de pánico en caso necesario.
+#### 6.- Recibir alertas en caso de riesgo.
 
 ## 🔌 API / Comunicación
 
