@@ -4,6 +4,7 @@ import LoginView from '../views/LoginView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import TimersView from '../views/TimersView.vue'
 import HistorialView from '../views/HistorialView.vue'
+import SetupView from '../views/SetupView.vue'
 
 const routes = [
   { path: '/', redirect: '/login' },
@@ -22,7 +23,23 @@ const routes = [
     path: '/historial',
     component: HistorialView,
     meta: { requiresAuth: true }
-  }
+  },
+    {
+    path: '/setup/:code?',  // ← Ruta para QR: /setup/KG-ABC123
+    name: 'setup',
+    component: SetupView
+  },
+  {
+    path: '/setup',  // ← Ruta sin código
+    name: 'setup-demo',
+    component: SetupView
+  },
+  {
+  path: '/generate-qr',
+  name: 'qr-generator',
+  component: () => import('../views/QRGeneratorView.vue'),
+  meta: { requiresAuth: true }
+}
 ]
 
 const router = createRouter({
