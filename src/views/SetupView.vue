@@ -11,7 +11,9 @@
             </linearGradient>
           </defs>
           <circle cx="30" cy="30" r="23" fill="#1A1F2E" stroke="#323B4E" stroke-width="1"/>
-          <circle cx="30" cy="30" r="20" fill="none" stroke="url(#setupLogoGrad)" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.6"/>
+          <circle cx="30" cy="30" r="20" fill="none" stroke="url(#setupLogoGrad)" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.6">
+            <animateTransform attributeName="transform" type="rotate" from="0 30 30" to="360 30 30" dur="15s" repeatCount="indefinite"/>
+          </circle>
           <path d="M30 14 C38 14 46 22 46 32 C46 42 38 48 30 49 C22 48 14 42 14 32 C14 22 22 14 30 14Z" fill="url(#setupLogoGrad)"/>
           <ellipse cx="24" cy="20" rx="3" ry="5" fill="rgba(255,255,255,0.15)" transform="rotate(-20, 24, 20)"/>
           <path d="M30 15 C33 8 38 5 42 8 C38 10 34 12 30 15Z" fill="#166534"/>
@@ -22,9 +24,9 @@
         </svg>
       </div>
 
-      <h2>Configurar tu Dispositivo</h2>
+      <h2>⚙️ Configurar tu Dispositivo</h2>
       
-      <!-- Código del dispositivo (viene del QR) -->
+      <!-- Código del dispositivo -->
       <div class="device-code-box">
         <span class="code-label">Código del dispositivo</span>
         <span class="code-value">{{ deviceCode }}</span>
@@ -49,7 +51,7 @@
           </div>
         </div>
         <div class="steps-labels">
-          <span :class="step >= 1 ? 'active' : ''">WiFi</span>
+          <span :class="step >= 1 ? 'active' : ''">Conectar WiFi</span>
           <span :class="step >= 2 ? 'active' : ''">Vincular</span>
           <span :class="step >= 3 ? 'active' : ''">¡Listo!</span>
         </div>
@@ -57,40 +59,30 @@
 
       <!-- Paso 1: Conectar WiFi -->
       <div v-if="step === 1" class="step-content">
-        <div class="step-icon">📡</div>
-        <h3>Conectar a WiFi</h3>
-        <p>Conecta tu sensor KitchenGuard a tu red WiFi</p>
+        <div class="step-icon">📶</div>
+        <h3>Conectar a tu red WiFi</h3>
+        <p>Selecciona tu red WiFi e ingresa la contraseña para que el sensor se conecte a internet.</p>
         
         <div class="form-group">
           <label>Red WiFi</label>
-          <input 
-            v-model="wifiSSID" 
-            type="text" 
-            placeholder="Nombre de tu red WiFi" 
-            class="setup-input"
-          />
+          <input v-model="wifiSSID" type="text" placeholder="Nombre de tu red WiFi" class="setup-input" />
         </div>
         
         <div class="form-group">
           <label>Contraseña</label>
-          <input 
-            v-model="wifiPass" 
-            type="password" 
-            placeholder="Contraseña de WiFi" 
-            class="setup-input"
-          />
+          <input v-model="wifiPass" type="password" placeholder="Contraseña de WiFi" class="setup-input" />
         </div>
         
         <button @click="conectarWiFi" class="setup-btn" :disabled="connecting">
-          {{ connecting ? 'Conectando...' : 'Conectar' }}
+          {{ connecting ? 'Conectando...' : 'Conectar a WiFi' }}
         </button>
       </div>
 
       <!-- Paso 2: Vincular dispositivo -->
       <div v-if="step === 2" class="step-content">
         <div class="step-icon">🔗</div>
-        <h3>Vincular Sensor</h3>
-        <p>Presiona el botón del sensor KitchenGuard hasta que la luz parpadee en <span style="color:#6366F1;font-weight:700">azul</span></p>
+        <h3>Vincular Dispositivo</h3>
+        <p>Presiona el botón en tu sensor KitchenGuard hasta que la luz parpadee en <span style="color:#6366F1;font-weight:700">azul</span>.</p>
         
         <div v-if="pairing" class="pairing-animation">
           <div class="pulse-circle"></div>
@@ -108,16 +100,16 @@
       <div v-if="step === 3" class="step-content">
         <div class="step-icon">🎉</div>
         <h3>¡Configuración Completa!</h3>
-        <p>Tu KitchenGuard está listo para proteger tu cocina</p>
+        <p>Tu sensor KitchenGuard está listo para proteger tu cocina 24/7.</p>
         
         <div class="success-info">
           <div class="info-row">
             <span>Dispositivo</span>
-            <span class="text-safe">✓ Conectado</span>
+            <span class="text-safe">✓ {{ deviceCode }}</span>
           </div>
           <div class="info-row">
             <span>WiFi</span>
-            <span class="text-safe">✓ {{ wifiSSID }}</span>
+            <span class="text-safe">✓ {{ wifiSSID || 'Conectado' }}</span>
           </div>
           <div class="info-row">
             <span>Sensores</span>
@@ -126,8 +118,10 @@
         </div>
         
         <router-link to="/dashboard" class="setup-btn primary">
-          Ir al Dashboard
+          🏠 Ir al Dashboard
         </router-link>
+        
+        <p class="tip">💡 Descarga nuestra app móvil para recibir alertas en tiempo real</p>
       </div>
     </div>
   </div>
@@ -145,13 +139,11 @@ const wifiPass = ref('')
 const connecting = ref(false)
 const pairing = ref(false)
 
-// Obtener código del QR de la URL
 onMounted(() => {
-  const codeFromQR = route.query.code || route.params.code
+  const codeFromQR = route.params.code || route.query.code
   if (codeFromQR) {
     deviceCode.value = codeFromQR
   } else {
-    // Generar código de demo
     deviceCode.value = 'KG-' + Math.random().toString(36).substring(2, 8).toUpperCase()
   }
 })
@@ -163,20 +155,14 @@ const conectarWiFi = async () => {
   }
   
   connecting.value = true
-  
-  // Simular conexión (en producción, aquí iría la lógica real)
   await new Promise(resolve => setTimeout(resolve, 2000))
-  
   connecting.value = false
   step.value = 2
 }
 
 const vincularDispositivo = async () => {
   pairing.value = true
-  
-  // Simular vinculación (en producción, aquí iría la lógica real)
   await new Promise(resolve => setTimeout(resolve, 3000))
-  
   pairing.value = false
   step.value = 3
 }
@@ -187,7 +173,7 @@ const vincularDispositivo = async () => {
 
 .setup-container {
   min-height: 100vh;
-  background: #0A0D14;
+  background: linear-gradient(135deg, #0A0D14 0%, #111827 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -252,33 +238,34 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .step-dot {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: #262D3D;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   color: #475569;
-  transition: all .3s;
+  transition: all 0.3s;
 }
 
 .step-dot.active {
   background: #F97316;
   color: white;
+  box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3);
 }
 
 .step-connector {
-  width: 50px;
+  width: 60px;
   height: 2px;
   background: #262D3D;
-  transition: all .3s;
+  transition: all 0.3s;
 }
 
 .step-connector.active {
@@ -300,31 +287,31 @@ h2 {
 
 /* Contenido de pasos */
 .step-content {
-  animation: fadeIn .3s ease;
+  animation: fadeSlideIn 0.4s ease;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(15px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .step-icon {
-  font-size: 48px;
+  font-size: 56px;
   margin-bottom: 16px;
 }
 
 .step-content h3 {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: #F8FAFC;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .step-content p {
   font-size: 14px;
   color: #94A3B8;
   margin-bottom: 24px;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .form-group {
@@ -337,29 +324,31 @@ h2 {
   font-size: 11px;
   color: #94A3B8;
   text-transform: uppercase;
-  letter-spacing: .8px;
+  letter-spacing: 0.8px;
   margin-bottom: 6px;
+  font-weight: 600;
 }
 
 .setup-input {
   width: 100%;
-  padding: 12px 16px;
+  padding: 14px 16px;
   background: #0A0D14;
   border: 1px solid #262D3D;
-  border-radius: 10px;
+  border-radius: 12px;
   color: #F8FAFC;
   font-size: 15px;
   outline: none;
-  transition: border-color .2s;
+  transition: all 0.2s;
 }
 
 .setup-input:focus {
   border-color: #F97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
 }
 
 .setup-btn {
   width: 100%;
-  padding: 14px;
+  padding: 15px;
   background: #F97316;
   border: none;
   border-radius: 12px;
@@ -367,27 +356,23 @@ h2 {
   font-weight: 700;
   font-size: 15px;
   cursor: pointer;
-  transition: all .2s;
-  text-decoration: none;
-  display: inline-block;
+  transition: all 0.2s;
   margin-top: 8px;
 }
 
-.setup-btn:hover {
+.setup-btn:hover:not(:disabled) {
   background: #EA580C;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(249, 115, 22, 0.3);
 }
 
 .setup-btn:disabled {
-  opacity: .6;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
 .setup-btn.primary {
   background: #10B981;
-}
-
-.setup-btn.primary:hover {
-  background: #059669;
 }
 
 .back-btn {
@@ -396,8 +381,9 @@ h2 {
   color: #94A3B8;
   font-size: 13px;
   cursor: pointer;
-  margin-top: 12px;
+  margin-top: 16px;
   padding: 8px;
+  transition: color 0.2s;
 }
 
 .back-btn:hover {
@@ -410,22 +396,21 @@ h2 {
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  margin: 20px 0;
+  margin: 24px 0;
 }
 
 .pulse-circle {
-  width: 60px;
-  height: 60px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
-  background: rgba(99, 102, 241, .2);
+  background: rgba(99, 102, 241, 0.1);
   border: 3px solid #6366F1;
   animation: pulse 1.5s infinite;
 }
 
 @keyframes pulse {
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.2); opacity: .5; }
-  100% { transform: scale(1); opacity: 1; }
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.5; }
 }
 
 .pairing-animation span {
@@ -439,15 +424,15 @@ h2 {
   border: 1px solid #262D3D;
   border-radius: 12px;
   padding: 16px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   text-align: left;
 }
 
 .info-row {
   display: flex;
   justify-content: space-between;
-  padding: 8px 0;
-  font-size: 13px;
+  padding: 10px 0;
+  font-size: 14px;
   color: #94A3B8;
 }
 
@@ -458,5 +443,17 @@ h2 {
 .text-safe {
   color: #10B981;
   font-weight: 600;
+}
+
+.tip {
+  color: #475569;
+  font-size: 12px;
+  margin-top: 16px;
+}
+
+@media (max-width: 480px) {
+  .setup-card {
+    padding: 28px 20px;
+  }
 }
 </style>
