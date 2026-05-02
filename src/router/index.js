@@ -24,22 +24,18 @@ const routes = [
     component: HistorialView,
     meta: { requiresAuth: true }
   },
-    {
-    path: '/setup/:code?',  // ← Ruta para QR: /setup/KG-ABC123
+  {
+    path: '/setup/:code?',
     name: 'setup',
-    component: SetupView
+    component: SetupView,
+    meta: { requiresAuth: false }
   },
   {
-    path: '/setup',  // ← Ruta sin código
-    name: 'setup-demo',
-    component: SetupView
-  },
-  {
-  path: '/generate-qr',
-  name: 'qr-generator',
-  component: () => import('../views/QRGeneratorView.vue'),
-  meta: { requiresAuth: true }
-}
+    path: '/generate-qr',
+    name: 'qr-generator',
+    component: () => import('../views/QRGeneratorView.vue'),
+    meta: { requiresAuth: true }
+  }
 ]
 
 const router = createRouter({
