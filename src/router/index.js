@@ -44,12 +44,8 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
-  if (to.meta.requiresAuth) {
-    const { data } = await supabase.auth.getSession()
-    if (!data.session) {
-      return `/login?redirect=${encodeURIComponent(to.fullPath)}`
-    }
-  }
+  // Desactivado temporalmente para probar setup
+  return true
 })
 
 export default router
