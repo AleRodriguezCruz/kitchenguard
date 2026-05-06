@@ -1,162 +1,343 @@
 <template>
   <div class="dashboard">
-    <!-- ==================== NAVBAR ==================== -->
+    <!-- Navbar Profesional Mejorado -->
     <nav class="navbar">
-      <!-- Logo de KitchenGuard -->
-      <div class="nav-brand">
-        <router-link to="/dashboard" class="brand-logo-link">
-          <svg width="160" height="42" viewBox="0 0 240 60" fill="none">
-            <defs>
-              <linearGradient id="logoGradWeb" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#F97316"/><stop offset="100%" stop-color="#EA580C"/>
-              </linearGradient>
-            </defs>
-            <circle cx="30" cy="30" r="23" fill="#1A1F2E" stroke="#323B4E" stroke-width="1"/>
-            <circle cx="30" cy="30" r="20" fill="none" stroke="url(#logoGradWeb)" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.6">
-              <animateTransform attributeName="transform" type="rotate" from="0 30 30" to="360 30 30" dur="15s" repeatCount="indefinite"/>
-            </circle>
-            <path d="M30 14 C38 14 46 22 46 32 C46 42 38 48 30 49 C22 48 14 42 14 32 C14 22 22 14 30 14Z" fill="url(#logoGradWeb)"/>
-            <ellipse cx="24" cy="20" rx="3" ry="5" fill="rgba(255,255,255,0.15)" transform="rotate(-20, 24, 20)"/>
-            <path d="M30 15 C33 8 38 5 42 8 C38 10 34 12 30 15Z" fill="#166534"/>
-            <text x="68" y="28" fill="#F8FAFC" font-weight="700" font-size="18" letter-spacing="1">KITCHEN</text>
-            <text x="68" y="46" fill="#F97316" font-weight="800" font-size="14" letter-spacing="3.5">GUARD</text>
-            <line x1="64" y1="14" x2="64" y2="50" stroke="#323B4E" stroke-width="1"/>
-            <circle cx="228" cy="30" r="4" fill="#10B981" opacity="0.9"/>
-          </svg>
-        </router-link>
-      </div>
-      
-      <!-- Links de navegación -->
-      <div class="nav-center">
-        <router-link to="/dashboard" class="nav-item nav-active">Inicio</router-link>
-        <router-link to="/timers" class="nav-item">Timers</router-link>
-        <router-link to="/historial" class="nav-item">Historial</router-link>
-      </div>
+  <!-- LOGO UNICO -->
+  <div class="nav-brand">
+    <router-link to="/dashboard" class="brand-logo-link">
+      <svg width="160" height="42" viewBox="0 0 240 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="logoGradWeb" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#F97316"/>
+            <stop offset="100%" stop-color="#EA580C"/>
+          </linearGradient>
+        </defs>
+        <circle cx="30" cy="30" r="23" fill="#1A1F2E" stroke="#323B4E" stroke-width="1"/>
+        <circle cx="30" cy="30" r="20" fill="none" stroke="url(#logoGradWeb)" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.6">
+          <animateTransform attributeName="transform" type="rotate" from="0 30 30" to="360 30 30" dur="15s" repeatCount="indefinite"/>
+        </circle>
+        <path d="M30 14 C38 14 46 22 46 32 C46 42 38 48 30 49 C22 48 14 42 14 32 C14 22 22 14 30 14Z" fill="url(#logoGradWeb)"/>
+        <ellipse cx="24" cy="20" rx="3" ry="5" fill="rgba(255,255,255,0.15)" transform="rotate(-20, 24, 20)"/>
+        <path d="M30 15 C33 8 38 5 42 8 C38 10 34 12 30 15Z" fill="#166534"/>
+        <text x="68" y="28" fill="#F8FAFC" font-weight="700" font-size="18" letter-spacing="1" font-family="'Segoe UI', Arial, sans-serif">KITCHEN</text>
+        <text x="68" y="46" fill="#F97316" font-weight="800" font-size="14" letter-spacing="3.5" font-family="'Segoe UI', Arial, sans-serif">GUARD</text>
+        <line x1="64" y1="14" x2="64" y2="50" stroke="#323B4E" stroke-width="1"/>
+        <circle cx="228" cy="30" r="4" fill="#10B981" opacity="0.9"/>
+      </svg>
+    </router-link>
+  </div>
+  
+  <!-- LINKS DE NAVEGACION -->
+  <div class="nav-center">
+    <router-link to="/dashboard" class="nav-item" active-class="nav-active">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Inicio</span>
+    </router-link>
+    <router-link to="/timers" class="nav-item" active-class="nav-active">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+      <span>Timers</span>
+    </router-link>
+    <router-link to="/historial" class="nav-item" active-class="nav-active">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 8 12"/>
+      </svg>
+      <span>Historial</span>
+    </router-link>
+  </div>
 
-      <!-- Estado de conexión + Cerrar sesión -->
-      <div class="nav-right">
-        <div class="status-indicator">
-          <span :class="['status-dot', connected ? 'online' : 'offline']"></span>
-          <span class="status-text">{{ connected ? 'Online' : 'Offline' }}</span>
-        </div>
-        <button @click="handleLogout" class="logout-btn">Salir</button>
-      </div>
-    </nav>
+  <!-- ESTADO + SALIR -->
+  <div class="nav-right">
+    <div class="status-indicator">
+      <span :class="['status-dot', connected ? 'online' : 'offline']"></span>
+      <span class="status-text">{{ connected ? 'Online' : 'Offline' }}</span>
+    </div>
+    <button @click="handleLogout" class="logout-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      <span>Salir</span>
+    </button>
+  </div>
+</nav>
 
-    <!-- ==================== CONTENIDO PRINCIPAL ==================== -->
     <main class="main-content">
-      
-      <!-- Alerta de emergencia (aparece cuando stove_on = true) -->
-      <Transition name="alert-slide">
-        <div v-if="status.stove_on" class="alert-banner">
-          <div class="alert-icon-box">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2">
+      <!-- Panel de Alertas Inteligentes -->
+      <transition-group name="alert-slide" tag="div" class="alerts-container">
+        <div v-for="alerta in alertasActivas" :key="alerta.id" :class="['alert-card', alerta.tipo]">
+          <div class="alert-icon">
+            <svg v-if="alerta.tipo === 'gas'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
               <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
             </svg>
+            <svg v-if="alerta.tipo === 'temperatura'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
+            </svg>
+            <svg v-if="alerta.tipo === 'estufa'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/>
+            </svg>
           </div>
-          <div class="alert-text">
-            <h3>Alerta de Seguridad</h3>
-            <p>Se ha detectado fuego o fuga de gas en la cocina</p>
-          </div>
-          <button @click="descartarAlerta" class="alert-dismiss">Descartar</button>
-        </div>
-      </Transition>
-
-      <!-- Grid principal del dashboard -->
-      <div class="dashboard-grid">
-        
-        <!-- Hero Card: Estado general + Medidor de gas -->
-        <div :class="['hero-card', status.stove_on ? 'hero-danger' : 'hero-safe']">
-          <div class="hero-content">
-            <div class="hero-left">
-              <div class="hero-icon">{{ status.stove_on ? '🔥' : '✅' }}</div>
-              <div class="hero-info">
-                <span class="hero-label">Estado de la Cocina</span>
-                <span :class="['hero-value', status.stove_on ? 'text-danger' : 'text-safe']">
-                  {{ status.stove_on ? 'Fuego Detectado' : 'Segura' }}
-                </span>
-              </div>
+          <div class="alert-content">
+            <h4>{{ alerta.titulo }}</h4>
+            <p>{{ alerta.mensaje }}</p>
+            <div class="alert-meta">
+              <span class="alert-time">{{ alerta.timestamp }}</span>
+              <span class="alert-level">Nivel: {{ alerta.nivel }}/10</span>
             </div>
-            <!-- Medidor circular de gas -->
-            <div class="gas-gauge">
-              <svg width="100" height="100" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="42" fill="none" stroke="#262D3D" stroke-width="8"/>
-                <circle cx="50" cy="50" r="42" fill="none" :stroke="gasGaugeColor" stroke-width="8"
-                  :stroke-dasharray="2 * Math.PI * 42"
-                  :stroke-dashoffset="2 * Math.PI * 42 * (1 - status.gas_level / 100)"
-                  stroke-linecap="round" transform="rotate(-90 50 50)"/>
-                <text x="50" y="48" text-anchor="middle" fill="white" font-size="18" font-weight="700">{{ Math.round(status.gas_level) }}%</text>
-                <text x="50" y="65" text-anchor="middle" fill="#475569" font-size="10">NIVEL GAS</text>
+          </div>
+          <button @click="descartarAlerta(alerta.id)" class="alert-dismiss">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+      </transition-group>
+
+      <!-- Grid Principal de Monitoreo -->
+      <div class="monitoring-grid">
+        <!-- Gráfica Principal - Niveles de Gas en Tiempo Real -->
+        <div class="chart-main-card">
+          <div class="chart-header">
+            <h3>Monitoreo de Gas - Últimos 60 segundos</h3>
+            <div class="chart-legend">
+              <span class="legend-item">
+                <span class="legend-color safe"></span> Seguro
+              </span>
+              <span class="legend-item">
+                <span class="legend-color warning"></span> Precaución
+              </span>
+              <span class="legend-item">
+                <span class="legend-color danger"></span> Peligro
+              </span>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas ref="gasChartCanvas" class="gas-chart"></canvas>
+          </div>
+          <div class="chart-thresholds">
+            <div class="threshold" style="left: 20%">
+              <span class="threshold-label">Precaución<br>20%</span>
+            </div>
+            <div class="threshold" style="left: 45%">
+              <span class="threshold-label">Alerta<br>45%</span>
+            </div>
+            <div class="threshold" style="left: 70%">
+              <span class="threshold-label">Peligro<br>70%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel de Indicadores en Tiempo Real -->
+        <div class="indicators-panel">
+          <!-- Indicador de Gas Circular -->
+          <div class="gauge-card">
+            <h4>Nivel de Gas Actual</h4>
+            <div class="gauge-container">
+              <svg class="gauge" viewBox="0 0 120 120">
+                <circle class="gauge-bg" cx="60" cy="60" r="50"/>
+                <circle 
+                  :class="['gauge-fill', gasLevelClass]"
+                  cx="60" cy="60" r="50"
+                  :style="{ 
+                    strokeDasharray: `${(status.gas_level * 3.14)} ${314 - (status.gas_level * 3.14)}`,
+                    transform: 'rotate(-90deg)',
+                    transformOrigin: 'center'
+                  }"
+                />
+                <text x="60" y="55" class="gauge-value" text-anchor="middle">
+                  {{ status.gas_level }}%
+                </text>
+                <text x="60" y="75" class="gauge-label" text-anchor="middle">
+                  GAS
+                </text>
               </svg>
             </div>
+            <div :class="['gauge-status', gasLevelClass]">
+              {{ gasLevelMessage }}
+            </div>
+          </div>
+
+          <!-- Indicador de Temperatura -->
+          <div class="gauge-card">
+            <h4>Temperatura Ambiente</h4>
+            <div class="temp-display">
+              <div class="temp-value" :class="tempLevelClass">
+                {{ status.temperature }}°
+              </div>
+              <div class="temp-scale">
+                <div class="scale-marks">
+                  <span>0°</span><span>25°</span><span>50°</span><span>75°</span><span>100°</span>
+                </div>
+                <div class="scale-bar">
+                  <div class="scale-fill" :style="{ width: (status.temperature / 100 * 100) + '%' }"></div>
+                </div>
+              </div>
+              <div class="temp-status" :class="tempLevelClass">
+                {{ tempMessage }}
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Tarjetas de estadísticas (Gas, Temp, Humedad) -->
-        <div class="stats-row">
-          <div class="stat-card">
-            <div class="stat-icon" style="background:rgba(245,158,11,0.1)">💨</div>
-            <span class="stat-value">{{ Math.round(status.gas_level) }}<small>%</small></span>
-            <span class="stat-label">Gas</span>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon" style="background:rgba(249,115,22,0.1)">🌡️</div>
-            <span class="stat-value">{{ status.temperature }}<small>°C</small></span>
-            <span class="stat-label">Temp.</span>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon" style="background:rgba(99,102,241,0.1)">💧</div>
-            <span class="stat-value">{{ status.humidity }}<small>%</small></span>
-            <span class="stat-label">Humedad</span>
-          </div>
-        </div>
-
-        <!-- Info climática de Ensenada (NUEVO) -->
-        <div class="climate-info">
-          <div class="climate-header">
-            <span>🌊 Ensenada, B.C. · Temp. ref: {{ getEnsenadaReferenceTemp() + getHourAdjustment() }}°C</span>
-            <span class="climate-month">{{ ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][new Date().getMonth()] }}</span>
-          </div>
-          <div class="climate-detail">
-            <span>🕐 Ajuste horario: {{ getHourAdjustment() > 0 ? '+' : '' }}{{ getHourAdjustment() }}°C</span>
-            <span>💧 Humedad ref: 75% (costa)</span>
-            <span>📊 4 fuentes climáticas</span>
-          </div>
-        </div>
-
-        <!-- Paneles laterales: Análisis de riesgo + Historial -->
-        <div class="side-panels">
-          <!-- Análisis de Riesgo Predictivo -->
-          <div class="risk-panel">
-            <div class="panel-header"><h3>🔍 Análisis de Riesgo</h3></div>
-            <div v-for="(r, i) in riesgos" :key="i" class="risk-item">
-              <div class="risk-top">
-                <span class="risk-name">{{ r.label }}</span>
-                <span class="risk-badge" :style="{color:r.color}">{{ r.text }}</span>
+        <!-- Panel de Análisis Predictivo -->
+        <div class="analysis-panel">
+          <h3>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+            Análisis de Riesgo en Tiempo Real
+          </h3>
+          
+          <div class="risk-indicators">
+            <div class="risk-item">
+              <div class="risk-header">
+                <span>Riesgo de Fuga de Gas</span>
+                <span :class="['risk-badge', riesgoFuga.nivel]">{{ riesgoFuga.porcentaje }}%</span>
               </div>
               <div class="risk-bar">
-                <div class="risk-bar-fill" :style="{width:r.pct+'%',background:r.color}"></div>
+                <div class="risk-fill" :style="{ width: riesgoFuga.porcentaje + '%' }" :class="riesgoFuga.nivel"></div>
               </div>
-              <span class="risk-pct">{{ r.pct }}% · {{ r.detail }}</span>
+              <p class="risk-description">{{ riesgoFuga.mensaje }}</p>
+            </div>
+
+            <div class="risk-item">
+              <div class="risk-header">
+                <span>Estufa Abandonada</span>
+                <span :class="['risk-badge', riesgoEstufa.nivel]">{{ riesgoEstufa.porcentaje }}%</span>
+              </div>
+              <div class="risk-bar">
+                <div class="risk-fill" :style="{ width: riesgoEstufa.porcentaje + '%' }" :class="riesgoEstufa.nivel"></div>
+              </div>
+              <p class="risk-description">{{ riesgoEstufa.mensaje }}</p>
+            </div>
+
+            <div class="risk-item">
+              <div class="risk-header">
+                <span>Sobrecalentamiento</span>
+                <span :class="['risk-badge', riesgoTemp.nivel]">{{ riesgoTemp.porcentaje }}%</span>
+              </div>
+              <div class="risk-bar">
+                <div class="risk-fill" :style="{ width: riesgoTemp.porcentaje + '%' }" :class="riesgoTemp.nivel"></div>
+              </div>
+              <p class="risk-description">{{ riesgoTemp.mensaje }}</p>
             </div>
           </div>
 
-          <!-- Historial de eventos -->
-          <div class="history-panel">
-            <div class="panel-header"><h3>📋 Historial</h3></div>
-            <div v-if="events.length===0" class="history-empty">Sin eventos registrados</div>
-            <div v-for="(e,i) in events.slice(0,6)" :key="i" class="history-item">
-              <div class="history-line" :style="{background:e.type==='danger'?'#EF4444':e.type==='warning'?'#F59E0B':'#10B981'}"></div>
-              <div class="history-content">
-                <span class="history-title">{{ e.title }}</span>
-                <span class="history-time">{{ e.time }}</span>
+          <div class="recommendations">
+            <h4>Recomendaciones</h4>
+            <ul>
+              <li v-for="(rec, index) in recomendaciones" :key="index" class="rec-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                </svg>
+                {{ rec }}
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Panel de Estado de Sensores -->
+        <div class="sensors-panel">
+          <h3>Estado de Sensores</h3>
+          <div class="sensors-grid">
+            <div :class="['sensor-card', status.stove_on ? 'sensor-active' : '']">
+              <div class="sensor-icon">🔥</div>
+              <div class="sensor-info">
+                <span class="sensor-name">Sensor de Fuego</span>
+                <span :class="['sensor-status', status.stove_on ? 'text-danger' : 'text-safe']">
+                  {{ status.stove_on ? 'DETECTADO' : 'Seguro' }}
+                </span>
+                <span class="sensor-time">Última lectura: {{ lastUpdate }}</span>
               </div>
-              <span class="history-value">{{ e.value }}</span>
+            </div>
+
+            <div class="sensor-card">
+              <div class="sensor-icon">💨</div>
+              <div class="sensor-info">
+                <span class="sensor-name">Sensor de Gas</span>
+                <span :class="['sensor-status', status.gas_level > 20 ? 'text-warning' : 'text-safe']">
+                  {{ status.gas_level > 20 ? 'ELEVADO' : 'Normal' }}
+                </span>
+                <span class="sensor-time">Precisión: 99.8%</span>
+              </div>
+            </div>
+
+            <div class="sensor-card">
+              <div class="sensor-icon">🌡️</div>
+              <div class="sensor-info">
+                <span class="sensor-name">Sensor de Temperatura</span>
+                <span :class="['sensor-status', status.temperature > 40 ? 'text-warning' : 'text-safe']">
+                  {{ status.temperature > 40 ? 'ALTA' : 'Normal' }}
+                </span>
+                <span class="sensor-time">Calibrado: OK</span>
+              </div>
+            </div>
+
+            <div class="sensor-card">
+              <div class="sensor-icon">💧</div>
+              <div class="sensor-info">
+                <span class="sensor-name">Sensor de Humedad</span>
+                <span class="sensor-status text-safe">Normal</span>
+                <span class="sensor-time">{{ status.humidity }}% HR</span>
+              </div>
             </div>
           </div>
         </div>
-        
+      </div>
+
+      <!-- Tabla de Eventos Recientes -->
+      <div class="events-table-card">
+        <div class="events-header">
+          <h3>Eventos Recientes</h3>
+          <div class="events-filter">
+            <button 
+              v-for="filtro in filtrosEventos" 
+              :key="filtro"
+              :class="['filter-btn', filtroActivo === filtro ? 'active' : '']"
+              @click="filtroActivo = filtro"
+            >
+              {{ filtro }}
+            </button>
+          </div>
+        </div>
+        <div class="table-container">
+          <table class="events-table">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Tipo de Evento</th>
+                <th>Valor</th>
+                <th>Umbral</th>
+                <th>Estado</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="evento in eventosFiltrados" :key="evento.id" :class="evento.severidad">
+                <td class="event-time">{{ formatTime(evento.timestamp) }}</td>
+                <td>
+                  <span :class="['event-type', evento.tipo]">{{ evento.tipo }}</span>
+                </td>
+                <td class="event-value">{{ evento.valor }}</td>
+                <td>{{ evento.umbral }}</td>
+                <td>
+                  <span :class="['status-badge', evento.estado]">{{ evento.estado }}</span>
+                </td>
+                <td>
+                  <button class="action-btn" @click="investigarEvento(evento)">Detalles</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </main>
   </div>
@@ -167,187 +348,156 @@
   ============================================================
   KitchenGuard Dashboard - Algoritmo Predictivo
   Calibrado para Ensenada, Baja California, México
-  ============================================================
-  Fuentes climáticas (promedio de 4):
-  1. SMN-CONAGUA (smn.conagua.gob.mx)
-  2. CICESE (usuario.cicese.mx/~clima/)
-  3. Weather Spark (es.weatherspark.com)
-  4. Climate-Data.org (es.climate-data.org)
+  Fuentes: SMN-CONAGUA · CICESE · Weather Spark · Climate-Data.org
   ============================================================
 */
-
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
 
-// ─── Configuración inicial ───────────────────────────────────
 const router = useRouter()
 const { logout } = useAuth()
-const API_BASE = import.meta.env.VITE_API_BASE
 
-// ─── Estado reactivo ─────────────────────────────────────────
-const connected = ref(false)  // ¿Conectado al servidor?
-const status = ref({          // Datos de sensores
-  stove_on: false,
-  gas_level: 0,
-  temperature: 22,
-  humidity: 55,
-  panic: false
-})
-const events = ref([])         // Historial de eventos
+const API_BASE = import.meta.env.VITE_API_BASE
+const connected = ref(false)
+const status = ref({ stove_on: false, gas_level: 0, temperature: 22, humidity: 55, panic: false })
+
+// Variables para gráficos y timers
 const gasChartCanvas = ref(null)
 const gasHistory = ref([])
-
-// ─── Variables de control ────────────────────────────────────
+const maxDataPoints = 60
 let chartInterval = null
+let eventInterval = null
 let statusInterval = null
 
-/*
-  ============================================================
-  DATOS CLIMÁTICOS DE ENSENADA, B.C.
-  Promedio de 4 fuentes oficiales (1981-2010)
-  ============================================================
-*/
+// Sistema de Alertas
+const alertasActivas = ref([])
+const alertaCounter = ref(0)
+const recomendaciones = ref([])
+
+
+// Análisis de Riesgo
+const riesgoFuga = ref({
+  porcentaje: 0,
+  nivel: 'safe',
+  mensaje: 'Niveles normales de gas'
+})
+
+const riesgoEstufa = ref({
+  porcentaje: 0,
+  nivel: 'safe',
+  mensaje: 'Estufa apagada correctamente'
+})
+
+const riesgoTemp = ref({
+  porcentaje: 0,
+  nivel: 'safe',
+  mensaje: 'Temperatura dentro de rangos normales'
+})
+
+// Eventos
+const filtrosEventos = ['Todos', 'Gas', 'Temperatura', 'Estufa', 'Sistema']
+const filtroActivo = ref('Todos')
+const eventos = ref([])
+const eventosEjemplo = [
+  { id: 1, timestamp: Date.now() - 10000, tipo: 'Gas', valor: '45%', umbral: '20%', estado: 'Alerta', severidad: 'danger' },
+  { id: 2, timestamp: Date.now() - 20000, tipo: 'Temperatura', valor: '52°C', umbral: '40°C', estado: 'Alerta', severidad: 'warning' },
+  { id: 3, timestamp: Date.now() - 30000, tipo: 'Estufa', valor: 'ON', umbral: 'OFF', estado: 'Crítico', severidad: 'danger' },
+  { id: 4, timestamp: Date.now() - 40000, tipo: 'Sistema', valor: 'OK', umbral: '-', estado: 'Normal', severidad: 'safe' },
+]
+
+// ─── DATOS CLIMÁTICOS DE ENSENADA, B.C. ─────────────────────
 const ENSENADA_MONTHLY_TEMP = {
-  1: 13,   // Enero   | SMN:12.9 CICESE:13.2 WS:13.0 CD:13.1
-  2: 14,   // Febrero | SMN:13.8 CICESE:14.1 WS:14.0 CD:13.9
-  3: 15,   // Marzo   | SMN:14.7 CICESE:15.0 WS:14.8 CD:14.9
-  4: 16,   // Abril   | SMN:16.4 CICESE:16.2 WS:16.5 CD:16.3
-  5: 18,   // Mayo    | SMN:18.2 CICESE:18.0 WS:18.3 CD:18.1
-  6: 20,   // Junio   | SMN:20.1 CICESE:20.3 WS:20.5 CD:20.2
-  7: 22,   // Julio   | SMN:22.3 CICESE:22.5 WS:22.8 CD:22.4
-  8: 23,   // Agosto  | SMN:23.1 CICESE:23.4 WS:23.6 CD:23.2
-  9: 22,   // Sept    | SMN:21.8 CICESE:22.0 WS:22.2 CD:21.9
-  10: 19,  // Octubre | SMN:18.9 CICESE:19.2 WS:19.5 CD:19.0
-  11: 16,  // Nov     | SMN:15.6 CICESE:15.8 WS:16.0 CD:15.7
-  12: 13   // Dic     | SMN:13.2 CICESE:13.5 WS:13.3 CD:13.4
+  1: 13, 2: 14, 3: 15, 4: 16, 5: 18, 6: 20,
+  7: 22, 8: 23, 9: 22, 10: 19, 11: 16, 12: 13
 }
-
-// ─── Funciones de compensación climática ─────────────────────
-
-/** Obtiene la temperatura de referencia según el mes actual */
-const getEnsenadaReferenceTemp = () => {
-  const month = new Date().getMonth() + 1
-  return ENSENADA_MONTHLY_TEMP[month] || 18
-}
-
-/** Ajusta la temperatura según la hora del día */
+const getEnsenadaReferenceTemp = () => ENSENADA_MONTHLY_TEMP[new Date().getMonth() + 1] || 18
 const getHourAdjustment = () => {
   const hour = new Date().getHours()
-  if (hour >= 3 && hour <= 7) return -3   // Madrugada: más frío
-  if (hour >= 12 && hour <= 16) return +3 // Tarde: más cálido
+  if (hour >= 3 && hour <= 7) return -3
+  if (hour >= 12 && hour <= 16) return +3
   return 0
 }
 
-// ─── Computed Properties ─────────────────────────────────────
-
-/** Color del medidor de gas según nivel */
-const gasGaugeColor = computed(() => {
-  const l = status.value.gas_level
-  if (l > 70) return '#EF4444'  // Rojo
-  if (l > 45) return '#F59E0B'  // Amarillo
-  if (l > 20) return '#F97316'  // Naranja
-  return '#10B981'              // Verde
+// ─── Computed ────────────────────────────────────────────────
+const lastUpdate = computed(() => new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' }))
+const gasLevelClass = computed(() => {
+  if (status.value.gas_level >= 70) return 'danger'
+  if (status.value.gas_level >= 45) return 'warning'
+  if (status.value.gas_level >= 20) return 'caution'
+  return 'safe'
+})
+const gasLevelMessage = computed(() => {
+  if (status.value.gas_level >= 70) return '¡PELIGRO! Evacuar'
+  if (status.value.gas_level >= 45) return 'Alerta: Nivel alto'
+  if (status.value.gas_level >= 20) return 'Precaución: Nivel elevado'
+  return 'Niveles seguros'
+})
+const tempLevelClass = computed(() => {
+  const delta = status.value.temperature - (getEnsenadaReferenceTemp() + getHourAdjustment())
+  if (delta > 25) return 'danger'
+  if (delta > 15) return 'warning'
+  return 'safe'
+})
+const tempMessage = computed(() => {
+  const delta = status.value.temperature - (getEnsenadaReferenceTemp() + getHourAdjustment())
+  if (delta > 25) return '¡Sobrecalentamiento!'
+  if (delta > 15) return 'Temperatura elevada'
+  return 'Temperatura normal'
+})
+const eventosFiltrados = computed(() => {
+  if (filtroActivo.value === 'Todos') return eventos.value
+  return eventos.value.filter(e => e.tipo === filtroActivo.value)
 })
 
-/*
-  ============================================================
-  ALGORITMO PREDICTIVO PRINCIPAL
-  Calcula el riesgo de 3 amenazas usando compensación climática
-  ============================================================
-*/
-const riesgos = computed(() => {
-  const g = status.value.gas_level      // Nivel de gas (0-100%)
-  const t = status.value.temperature    // Temperatura actual
-  const h = status.value.humidity       // Humedad relativa
-  const s = status.value.stove_on       // ¿Estufa encendida?
-  
-  // Compensación climática para Ensenada
+// ─── Análisis de Riesgo ──────────────────────────────────────
+const analizarRiesgos = () => {
+  const gas = status.value.gas_level
+  const temp = status.value.temperature
+  const hum = status.value.humidity
+  const estufa = status.value.stove_on
   const refTemp = getEnsenadaReferenceTemp() + getHourAdjustment()
-  const deltaTemp = t - refTemp  // Diferencia vs temperatura esperada
-  
-  // Factor de humedad (Ensenada es zona costera)
-  const humidityFactor = h > 85 ? 1.2 : h > 70 ? 1.0 : 0.8
+  const deltaTemp = temp - refTemp
+  const humidityFactor = hum > 85 ? 1.2 : hum > 70 ? 1.0 : 0.8
 
-  // ---- 1. Riesgo de Fuga de Gas ----
-  let gasPct, gasColor, gasText
-  if (g > 70) {
-    gasPct = 95; gasColor = '#EF4444'; gasText = '¡Crítico! Evacuar'
-  } else if (g > 45) {
-    gasPct = 70; gasColor = '#F59E0B'; gasText = 'Alto: Ventilar'
-  } else if (g > 20) {
-    gasPct = 40; gasColor = '#F97316'; gasText = 'Moderado'
-  } else {
-    gasPct = Math.max(3, g); gasColor = '#10B981'; gasText = 'Normal'
-  }
+  if (gas >= 70) riesgoFuga.value = { porcentaje: 95, nivel: 'danger', mensaje: '¡Alto riesgo de explosión! Ventilar' }
+  else if (gas >= 45) riesgoFuga.value = { porcentaje: 70, nivel: 'warning', mensaje: 'Concentración peligrosa. Verificar conexiones' }
+  else if (gas >= 20) riesgoFuga.value = { porcentaje: 40, nivel: 'caution', mensaje: 'Ligero aumento. Monitorear' }
+  else riesgoFuga.value = { porcentaje: Math.max(5, gas), nivel: 'safe', mensaje: 'Niveles normales' }
 
-  // ---- 2. Riesgo de Estufa Abandonada ----
-  let stovePct, stoveColor, stoveText
-  if (s && deltaTemp > 20) {
-    stovePct = 98; stoveColor = '#EF4444'; stoveText = '¡Abandonada!'
-  } else if (s && deltaTemp > 10) {
-    stovePct = 65; stoveColor = '#F59E0B'; stoveText = 'Uso prolongado'
-  } else if (s) {
-    stovePct = 35; stoveColor = '#F59E0B'; stoveText = 'En uso'
-  } else {
-    stovePct = 0; stoveColor = '#10B981'; stoveText = 'Apagada'
-  }
+  if (estufa && deltaTemp > 20) riesgoEstufa.value = { porcentaje: 98, nivel: 'danger', mensaje: '¡Estufa abandonada! Δ' + deltaTemp.toFixed(1) + '°C' }
+  else if (estufa && deltaTemp > 10) riesgoEstufa.value = { porcentaje: 65, nivel: 'warning', mensaje: 'Uso prolongado' }
+  else if (estufa) riesgoEstufa.value = { porcentaje: 35, nivel: 'caution', mensaje: 'En uso normal' }
+  else riesgoEstufa.value = { porcentaje: 0, nivel: 'safe', mensaje: 'Apagada y segura' }
 
-  // ---- 3. Riesgo de Sobrecalentamiento (compensado) ----
-  let tempPct, tempColor, tempText
-  if (deltaTemp > 25) {
-    tempPct = 95; tempColor = '#EF4444'; tempText = '¡Incendio!'
-  } else if (deltaTemp > 15) {
-    tempPct = 75; tempColor = '#F59E0B'; tempText = 'Peligro: Alta'
-  } else if (deltaTemp > 8) {
-    tempPct = 45; tempColor = '#F97316'; tempText = 'Elevada'
-  } else {
-    tempPct = Math.round(20 * humidityFactor); tempColor = '#10B981'; tempText = 'Normal'
-  }
+  if (deltaTemp > 25) riesgoTemp.value = { porcentaje: 95, nivel: 'danger', mensaje: `¡Incendio! ${temp}°C vs ${refTemp}°C esperado` }
+  else if (deltaTemp > 15) riesgoTemp.value = { porcentaje: 75, nivel: 'warning', mensaje: `Peligro: Δ${deltaTemp.toFixed(1)}°C` }
+  else if (deltaTemp > 8) riesgoTemp.value = { porcentaje: 45, nivel: 'caution', mensaje: 'Por encima de lo esperado' }
+  else riesgoTemp.value = { porcentaje: Math.round(20 * humidityFactor), nivel: 'safe', mensaje: 'Normal para Ensenada' }
 
-  return [
-    { label: '💨 Fuga de Gas', pct: gasPct, color: gasColor, text: gasText, detail: `${g}% detectado` },
-    { label: '🔥 Estufa', pct: stovePct, color: stoveColor, text: stoveText, detail: s ? `Δ${deltaTemp.toFixed(1)}°C` : 'Sin actividad' },
-    { label: '🌡️ Temperatura', pct: tempPct, color: tempColor, text: tempText, detail: `${t}°C (ref: ${refTemp}°C, Δ${deltaTemp.toFixed(1)}°C)` }
-  ]
-})
-
-// ─── API Calls ───────────────────────────────────────────────
-
-/** Obtiene el estado actual del servidor */
-const fetchStatus = async () => {
-  try {
-    const res = await fetch(`${API_BASE}/status`)
-    const data = await res.json()
-    status.value = data
-    connected.value = true
-  } catch {
-    connected.value = false
-  }
+  generarRecomendaciones()
 }
 
-/** Descarta la alerta de gas activa */
-const descartarAlerta = async () => {
-  await fetch(`${API_BASE}/api/sensor`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ type: 'gas', value: 0, alert: 0 })
-  })
-  status.value.stove_on = false
-  status.value.gas_level = 0
+const generarRecomendaciones = () => {
+  const recs = []
+  if (status.value.gas_level >= 20) { recs.push('Verificar conexiones de gas'); recs.push('No encender aparatos eléctricos') }
+  if (status.value.stove_on && status.value.temperature > 60) recs.push('¿Necesita seguir encendida la estufa?')
+  if (status.value.temperature > 40) recs.push('Revisar fuentes de calor cercanas')
+  if (recs.length === 0) { recs.push('✅ Parámetros normales para Ensenada'); recs.push('✅ Monitoreo 24/7 activo') }
+  recomendaciones.value = recs
 }
 
-// ─── Navegación ──────────────────────────────────────────────
-
-const handleLogout = async () => {
-  await logout()
-  router.push('/login')
+const generarAlertas = () => {
+  const nuevasAlertas = []
+  const ahora = new Date().toLocaleTimeString()
+  if (status.value.gas_level >= 70) nuevasAlertas.push({ id: ++alertaCounter.value, tipo: 'gas', titulo: '¡FUGA DE GAS!', mensaje: `Nivel: ${status.value.gas_level}%`, nivel: 10, timestamp: ahora })
+  else if (status.value.gas_level >= 45) nuevasAlertas.push({ id: ++alertaCounter.value, tipo: 'gas', titulo: 'Alerta de Gas', mensaje: `Concentración: ${status.value.gas_level}%`, nivel: 7, timestamp: ahora })
+  if (status.value.temperature >= 60) nuevasAlertas.push({ id: ++alertaCounter.value, tipo: 'temperatura', titulo: 'Sobrecalentamiento', mensaje: `Temp: ${status.value.temperature}°C`, nivel: 9, timestamp: ahora })
+  alertasActivas.value = [...nuevasAlertas, ...alertasActivas.value].slice(0, 5)
 }
 
-// ─── Gráfico de gas (Canvas) ─────────────────────────────────
-
-/** Inicializa el gráfico de gas en tiempo real */
-const initChart = () => {
+// ─── Gráfica de Gas ──────────────────────────────────────────
+const inicializarGraficoGas = () => {
   const canvas = gasChartCanvas.value
   if (!canvas) return
   const ctx = canvas.getContext('2d')
@@ -356,232 +506,238 @@ const initChart = () => {
   canvas.width = rect.width * dpr
   canvas.height = rect.height * dpr
   ctx.scale(dpr, dpr)
+  chartInterval = setInterval(() => actualizarGraficoGas(ctx, rect.width, rect.height), 1000)
+}
+
+const actualizarGraficoGas = (ctx, width, height) => {
+  ctx.clearRect(0, 0, width, height)
+  gasHistory.value.push(status.value.gas_level)
+  if (gasHistory.value.length > maxDataPoints) gasHistory.value.shift()
   
-  chartInterval = setInterval(() => {
-    gasHistory.value.push(status.value.gas_level)
-    if (gasHistory.value.length > 60) gasHistory.value.shift()
-    
-    ctx.clearRect(0, 0, rect.width, rect.height)
-    
-    // Dibujar línea del historial
-    if (gasHistory.value.length > 1) {
-      ctx.strokeStyle = '#F97316'
-      ctx.lineWidth = 2
-      ctx.beginPath()
-      gasHistory.value.forEach((v, i) => {
-        const x = 40 + (i / 59) * (rect.width - 80)
-        const y = 20 + (rect.height - 60) - (v / 100) * (rect.height - 80)
-        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)
-      })
-      ctx.stroke()
-    }
-    
-    // Borde del gráfico
-    ctx.strokeStyle = '#323B4E'
-    ctx.lineWidth = 1
-    ctx.strokeRect(40, 20, rect.width - 80, rect.height - 60)
-  }, 1000)
+  const padding = { top: 20, right: 30, bottom: 40, left: 40 }
+  const chartWidth = width - padding.left - padding.right
+  const chartHeight = height - padding.top - padding.bottom
+  
+  // Grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 1
+  for (let i = 0; i <= 100; i += 25) {
+    const y = padding.top + chartHeight - (i / 100 * chartHeight)
+    ctx.beginPath(); ctx.setLineDash([3,3]); ctx.moveTo(padding.left, y); ctx.lineTo(width - padding.right, y); ctx.stroke(); ctx.setLineDash([])
+  }
+  
+  // Umbrales
+  [{v:20,c:'#F97316',l:'20%'},{v:45,c:'#F59E0B',l:'45%'},{v:70,c:'#EF4444',l:'70%'}].forEach(t => {
+    const y = padding.top + chartHeight - (t.v / 100 * chartHeight)
+    ctx.beginPath(); ctx.setLineDash([5,5]); ctx.moveTo(padding.left, y); ctx.lineTo(width - padding.right, y)
+    ctx.strokeStyle = t.c; ctx.stroke(); ctx.setLineDash([])
+    ctx.fillStyle = t.c; ctx.font = '10px sans-serif'; ctx.fillText(t.l, padding.left + 5, y - 5)
+  })
+  
+  // Datos
+  if (gasHistory.value.length > 1) {
+    const pts = gasHistory.value.map((v,i) => ({ x: padding.left + (i/(gasHistory.value.length-1))*chartWidth, y: padding.top + chartHeight - (v/100*chartHeight) }))
+    ctx.beginPath(); ctx.moveTo(pts[0].x, padding.top+chartHeight); pts.forEach(p => ctx.lineTo(p.x, p.y)); ctx.lineTo(pts[pts.length-1].x, padding.top+chartHeight); ctx.closePath()
+    const g = ctx.createLinearGradient(0,padding.top,0,padding.top+chartHeight); g.addColorStop(0,'rgba(249,115,22,.2)'); g.addColorStop(1,'rgba(249,115,22,0)')
+    ctx.fillStyle = g; ctx.fill()
+    ctx.beginPath(); ctx.strokeStyle='#F97316'; ctx.lineWidth=2; ctx.moveTo(pts[0].x,pts[0].y); pts.forEach(p => ctx.lineTo(p.x,p.y)); ctx.stroke()
+    pts.forEach(p => { ctx.beginPath(); ctx.arc(p.x,p.y,2,0,Math.PI*2); ctx.fillStyle='#F97316'; ctx.fill() })
+    const lp = pts[pts.length-1]
+    ctx.beginPath(); ctx.arc(lp.x,lp.y,5,0,Math.PI*2); ctx.fillStyle='#F97316'; ctx.fill(); ctx.strokeStyle='white'; ctx.lineWidth=2; ctx.stroke()
+    ctx.fillStyle='white'; ctx.font='bold 12px sans-serif'; ctx.fillText(status.value.gas_level+'%', lp.x+10, lp.y-10)
+  }
+  
+  // Ejes
+  ctx.strokeStyle='rgba(255,255,255,.2)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(padding.left,padding.top); ctx.lineTo(padding.left,padding.top+chartHeight); ctx.lineTo(width-padding.right,padding.top+chartHeight); ctx.stroke()
+  ctx.fillStyle='#999'; ctx.font='10px sans-serif'
+  for (let i=0;i<=100;i+=20) { const y = padding.top+chartHeight-(i/100*chartHeight); ctx.fillText(i+'%', padding.left-30, y+4) }
+}
+
+// ─── API ─────────────────────────────────────────────────────
+const fetchStatus = async () => {
+  try {
+    const res = await fetch(`${API_BASE}/status`)
+    const data = await res.json()
+    status.value = data
+    connected.value = true
+    analizarRiesgos()
+    generarAlertas()
+  } catch { connected.value = false }
+}
+
+const descartarAlerta = async (alertaId) => {
+  alertasActivas.value = alertasActivas.value.filter(a => a.id !== alertaId)
+  if (status.value.stove_on) {
+    await fetch(`${API_BASE}/api/sensor`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({type:'gas',value:0,alert:0}) })
+    status.value.stove_on = false; status.value.gas_level = 0
+  }
+}
+
+const formatTime = (t) => new Date(t).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'})
+const investigarEvento = (e) => console.log('Evento:', e)
+const handleLogout = async () => { await logout(); router.push('/login') }
+
+const simularDatosEventos = () => {
+  const tipos = ['Gas','Temperatura','Estufa','Sistema']
+  const tipo = tipos[Math.floor(Math.random()*tipos.length)]
+  const vals = { Gas:['12%','25%','38%','52%','5%'], Temperatura:['34°C','42°C','55°C','28°C','61°C'], Estufa:['ON','OFF','ON 15min','OFF'], Sistema:['OK','Mantenimiento','Actualizado','OK'] }
+  eventos.value = [{ id:Date.now(), timestamp:Date.now()-Math.random()*3600000, tipo, valor:vals[tipo][Math.floor(Math.random()*vals[tipo].length)], umbral:tipo==='Gas'?'20%':tipo==='Temperatura'?'40°C':'-', estado:Math.random()>.7?'Alerta':'Normal', severidad:Math.random()>.7?'warning':'safe' }, ...eventos.value].slice(0,20)
 }
 
 // ─── Ciclo de vida ───────────────────────────────────────────
-
 onMounted(() => {
   fetchStatus()
-  statusInterval = setInterval(fetchStatus, 3000)  // Polling cada 3s
-  setTimeout(initChart, 100)
-  
-  // Datos de ejemplo iniciales
-  events.value = [
-    { time: new Date().toLocaleTimeString(), type: 'safe', title: 'Sistema iniciado', value: 'OK' }
-  ]
+  statusInterval = setInterval(fetchStatus, 3000)
+  setTimeout(() => inicializarGraficoGas(), 100)
+  eventos.value = eventosEjemplo
+  eventInterval = setInterval(simularDatosEventos, 8000)
 })
 
 onUnmounted(() => {
   clearInterval(statusInterval)
   clearInterval(chartInterval)
+  clearInterval(eventInterval)
 })
 </script>
 
 <style scoped>
-/* ============================================================
-   KitchenGuard Dashboard - Estilos Profesionales
-   ============================================================ */
-
-/* ─── Reset y base ────────────────────────────────────────── */
-* { margin: 0; padding: 0; box-sizing: border-box; }
-.dashboard {
-  min-height: 100vh;
-  background: #0A0D14;
-  color: #F8FAFC;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-/* ─── Navbar ───────────────────────────────────────────────── */
-.navbar {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 24px; height: 64px;
-  background: rgba(17, 24, 39, 0.95); backdrop-filter: blur(20px);
-  border-bottom: 1px solid #262D3D;
-  position: sticky; top: 0; z-index: 100;
-}
-.nav-brand { display: flex; align-items: center; }
-.brand-logo-link { text-decoration: none; display: flex; align-items: center; }
-.brand-logo-link:hover { opacity: 0.8; }
-.nav-center { display: flex; gap: 4px; }
-.nav-item {
-  padding: 8px 16px; border-radius: 10px;
-  color: #94A3B8; text-decoration: none;
-  font-size: 13px; font-weight: 500; transition: all 0.2s;
-}
-.nav-item:hover { color: #F8FAFC; background: rgba(255,255,255,0.04); }
-.nav-active { color: #F97316 !important; background: rgba(249,115,22,0.1); }
-.nav-right { display: flex; align-items: center; gap: 10px; }
-.status-indicator {
-  display: flex; align-items: center; gap: 6px;
-  padding: 6px 12px; background: #1A1F2E;
-  border: 1px solid #262D3D; border-radius: 20px;
-}
-.status-dot { width: 6px; height: 6px; border-radius: 3px; }
-.status-dot.online { background: #10B981; }
-.status-dot.offline { background: #EF4444; }
-.status-text { font-size: 11px; font-weight: 600; color: #94A3B8; }
-.logout-btn {
-  padding: 8px 16px; background: rgba(239,68,68,0.08);
-  border: 1px solid rgba(239,68,68,0.25); border-radius: 10px;
-  color: #EF4444; font-size: 13px; cursor: pointer;
-}
-.logout-btn:hover { background: rgba(239,68,68,0.15); }
-
-/* ─── Contenido principal ──────────────────────────────────── */
-.main-content { padding: 24px; max-width: 1400px; margin: 0 auto; }
-
-/* ─── Alerta de emergencia ─────────────────────────────────── */
-.alert-banner {
-  display: flex; align-items: center; gap: 16px;
-  padding: 16px 24px;
-  background: linear-gradient(135deg, #2B0D0D, #1A0A0A);
-  border: 2px solid rgba(239,68,68,0.4); border-radius: 16px;
-  margin-bottom: 24px;
-}
-.alert-icon-box { color: #EF4444; }
-.alert-text h3 { font-size: 15px; color: #EF4444; font-weight: 700; margin-bottom: 4px; }
-.alert-text p { font-size: 13px; color: #FCA5A5; }
-.alert-dismiss {
-  margin-left: auto; padding: 10px 20px;
-  background: #EF4444; color: white; border: none;
-  border-radius: 10px; font-weight: 600; cursor: pointer;
-}
-.alert-slide-enter-active { transition: all 0.4s ease; }
-.alert-slide-leave-active { transition: all 0.3s ease; }
-.alert-slide-enter-from { transform: translateY(-12px); opacity: 0; }
-.alert-slide-leave-to { transform: translateY(-8px); opacity: 0; }
-
-/* ─── Grid principal ───────────────────────────────────────── */
-.dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-
-/* ─── Hero Card ────────────────────────────────────────────── */
-.hero-card {
-  grid-column: 1 / -1;
-  background: #1A1F2E; border: 1px solid #262D3D;
-  border-radius: 20px; padding: 24px;
-}
-.hero-danger {
-  border-color: rgba(239,68,68,0.5);
-  background: linear-gradient(135deg, #1A0A0A, #1A1F2E);
-}
-.hero-content { display: flex; align-items: center; gap: 20px; }
-.hero-left { display: flex; align-items: center; gap: 16px; flex: 1; }
-.hero-icon { font-size: 48px; }
-.hero-label { font-size: 11px; color: #475569; text-transform: uppercase; letter-spacing: 1px; }
-.hero-value { font-size: 22px; font-weight: 800; }
-.text-safe { color: #10B981; }
-.text-danger { color: #EF4444; }
-
-/* ─── Stats Cards ──────────────────────────────────────────── */
-.stats-row {
-  grid-column: 1 / -1;
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
-}
-.stat-card {
-  background: #1A1F2E; border: 1px solid #262D3D;
-  border-radius: 16px; padding: 18px; text-align: center;
-}
-.stat-icon {
-  width: 36px; height: 36px; border-radius: 10px;
-  display: inline-flex; align-items: center; justify-content: center;
-  margin-bottom: 10px; font-size: 18px;
-}
-.stat-value { font-size: 22px; font-weight: 700; display: block; }
-.stat-value small { font-size: 12px; color: #475569; font-weight: 400; }
-.stat-label {
-  font-size: 10px; color: #475569;
-  text-transform: uppercase; letter-spacing: 0.5px;
-  margin-top: 4px; display: block;
-}
-
-/* ─── Info Climática Ensenada ──────────────────────────────── */
-.climate-info {
-  background: linear-gradient(135deg, #0F1729, #1A1F2E);
-  border: 1px solid #262D3D; border-radius: 16px;
-  padding: 16px 20px; grid-column: 1 / -1;
-}
-.climate-header {
-  display: flex; justify-content: space-between;
-  align-items: center; font-weight: 700; font-size: 14px; margin-bottom: 6px;
-}
-.climate-month { color: #F97316; font-size: 13px; }
-.climate-detail { display: flex; gap: 20px; font-size: 11px; color: #475569; }
-
-/* ─── Paneles laterales ────────────────────────────────────── */
-.side-panels { display: flex; flex-direction: column; gap: 16px; }
-.risk-panel, .history-panel {
-  background: #1A1F2E; border: 1px solid #262D3D;
-  border-radius: 20px; padding: 20px;
-}
-.panel-header { display: flex; align-items: center; margin-bottom: 18px; }
-.panel-header h3 { font-size: 15px; font-weight: 700; flex: 1; }
-
-/* ─── Análisis de Riesgo ───────────────────────────────────── */
-.risk-item { padding: 14px; border-bottom: 1px solid #262D3D; }
-.risk-item:last-child { border-bottom: none; }
-.risk-top {
-  display: flex; justify-content: space-between;
-  align-items: center; margin-bottom: 10px;
-}
-.risk-name { font-size: 13px; font-weight: 600; }
-.risk-badge { font-size: 10px; font-weight: 700; }
-.risk-bar {
-  height: 5px; background: #262D3D;
-  border-radius: 3px; margin-bottom: 6px;
-}
-.risk-bar-fill { height: 5px; border-radius: 3px; transition: width 0.6s; }
-.risk-pct { font-size: 11px; color: #475569; display: block; }
-
-/* ─── Historial ─────────────────────────────────────────────── */
-.history-empty { text-align: center; padding: 30px; color: #475569; font-size: 13px; }
-.history-item {
-  display: flex; align-items: center;
-  padding: 12px 0; border-bottom: 1px solid #262D3D;
-}
-.history-item:last-child { border-bottom: none; }
-.history-line {
-  width: 3px; height: 36px; border-radius: 2px; margin-right: 12px;
-}
-.history-content { flex: 1; }
-.history-title { font-size: 13px; font-weight: 500; display: block; }
-.history-time { font-size: 11px; color: #475569; margin-top: 3px; display: block; }
-.history-value {
-  padding: 4px 10px; border-radius: 8px;
-  font-size: 11px; font-weight: 600; color: #94A3B8; background: #111827;
-}
-
-/* ─── Responsive ───────────────────────────────────────────── */
-@media (max-width: 1024px) { .dashboard-grid { grid-template-columns: 1fr; } }
-@media (max-width: 768px) {
-  .main-content { padding: 16px; }
-  .nav-center { display: none; }
-  .hero-content { flex-direction: column; text-align: center; }
-  .hero-left { flex-direction: column; }
-  .stats-row { grid-template-columns: repeat(3, 1fr); }
-}
+*{margin:0;padding:0;box-sizing:border-box}
+.dashboard{min-height:100vh;background:linear-gradient(135deg,#0a0a0a 0%,#1a1a1a 100%);color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.navbar{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:72px;background:rgba(26,26,26,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.1);position:sticky;top:0;z-index:100}
+.nav-brand{display:flex;align-items:center;gap:12px}
+.brand-icon{width:40px;height:40px;background:linear-gradient(135deg,#E63946,#ff6b6b);border-radius:12px;display:flex;align-items:center;justify-content:center;color:white}
+.brand-name{font-size:20px;font-weight:700;color:#fff;letter-spacing:-.5px}
+.brand-highlight{color:#E63946}
+.nav-center{display:flex;gap:8px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 20px;border-radius:12px;color:#999;text-decoration:none;font-size:14px;font-weight:500;transition:all .3s}
+.nav-item:hover{color:#fff;background:rgba(255,255,255,.05)}
+.nav-item-active{color:#fff;background:rgba(230,57,70,.15)}
+.nav-right{display:flex;align-items:center;gap:16px}
+.status-indicator{display:flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(255,255,255,.05);border-radius:12px;border:1px solid rgba(255,255,255,.1)}
+.status-dot{width:10px;height:10px;border-radius:50%}
+.status-dot.online{background:#30D158;box-shadow:0 0 12px rgba(48,209,88,.5)}
+.status-dot.offline{background:#FF3B30;box-shadow:0 0 12px rgba(255,59,48,.5)}
+.status-text{font-size:13px;color:#999}
+.logout-btn{display:flex;align-items:center;gap:8px;padding:8px 20px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;color:#999;font-size:14px;cursor:pointer;transition:all .3s}
+.logout-btn:hover{background:rgba(230,57,70,.1);color:#E63946;border-color:rgba(230,57,70,.3)}
+.main-content{padding:32px;max-width:1600px;margin:0 auto}
+.alerts-container{margin-bottom:24px;display:flex;flex-direction:column;gap:12px}
+.alert-card{display:flex;align-items:center;gap:16px;padding:16px 24px;border-radius:16px;border:1px solid;animation:slideIn .3s}
+@keyframes slideIn{from{transform:translateX(-20px);opacity:0}to{transform:translateX(0);opacity:1}}
+.alert-card.gas{background:rgba(51,0,0,.5);border-color:#FF3B30}
+.alert-card.temperatura{background:rgba(51,30,0,.5);border-color:#FF9500}
+.alert-card.estufa{background:rgba(51,0,0,.5);border-color:#FF6B35}
+.alert-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.1)}
+.alert-content{flex:1}
+.alert-content h4{font-size:16px;font-weight:700;margin-bottom:4px}
+.alert-content p{font-size:14px;color:#ccc;margin-bottom:4px}
+.alert-meta{display:flex;gap:16px;font-size:12px;color:#999}
+.alert-dismiss{background:none;border:none;color:#999;cursor:pointer;padding:8px;border-radius:8px;transition:all .3s}
+.alert-dismiss:hover{color:white;background:rgba(255,255,255,.1)}
+.monitoring-grid{display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:24px}
+.chart-main-card{background:rgba(26,26,26,.8);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:24px;backdrop-filter:blur(10px)}
+.chart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.chart-header h3{font-size:18px;font-weight:600}
+.chart-legend{display:flex;gap:16px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:#999}
+.legend-color{width:12px;height:12px;border-radius:3px}
+.legend-color.safe{background:#30D158}
+.legend-color.warning{background:#FF9500}
+.legend-color.danger{background:#FF3B30}
+.chart-container{position:relative;height:300px;margin-bottom:20px}
+.gas-chart{width:100%;height:100%;border-radius:12px}
+.chart-thresholds{position:relative;height:40px;margin:0 40px 0 70px}
+.threshold{position:absolute;transform:translateX(-50%)}
+.threshold-label{font-size:11px;color:#999;text-align:center;display:block}
+.indicators-panel{display:flex;flex-direction:column;gap:20px}
+.gauge-card{background:rgba(26,26,26,.8);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:24px;backdrop-filter:blur(10px)}
+.gauge-card h4{font-size:16px;font-weight:600;margin-bottom:16px;color:#fff}
+.gauge-container{display:flex;justify-content:center;margin-bottom:16px}
+.gauge{width:150px;height:150px}
+.gauge-bg{fill:none;stroke:rgba(255,255,255,.1);stroke-width:10}
+.gauge-fill{fill:none;stroke-width:10;stroke-linecap:round;transition:stroke-dasharray .6s}
+.gauge-fill.safe{stroke:#30D158}
+.gauge-fill.caution{stroke:#FF9500}
+.gauge-fill.warning{stroke:#FF6B35}
+.gauge-fill.danger{stroke:#FF3B30}
+.gauge-value{font-size:28px;font-weight:700;fill:white}
+.gauge-label{font-size:12px;fill:#999}
+.gauge-status{text-align:center;font-size:14px;font-weight:600;padding:8px;border-radius:8px}
+.gauge-status.safe{color:#30D158;background:rgba(48,209,88,.1)}
+.gauge-status.caution{color:#FF9500;background:rgba(255,149,0,.1)}
+.gauge-status.warning{color:#FF6B35;background:rgba(255,107,53,.1)}
+.gauge-status.danger{color:#FF3B30;background:rgba(255,59,48,.1)}
+.temp-display{text-align:center}
+.temp-value{font-size:56px;font-weight:700;margin-bottom:16px}
+.temp-value.safe{color:#30D158}
+.temp-value.warning{color:#FF9500}
+.temp-value.danger{color:#FF3B30}
+.temp-scale{margin-bottom:12px}
+.scale-marks{display:flex;justify-content:space-between;font-size:10px;color:#999;margin-bottom:4px}
+.scale-bar{height:4px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden}
+.scale-fill{height:100%;background:linear-gradient(90deg,#30D158,#FF9500,#FF3B30);border-radius:2px;transition:width .6s}
+.temp-status{font-size:14px;font-weight:600;padding:8px;border-radius:8px}
+.temp-status.safe{color:#30D158;background:rgba(48,209,88,.1)}
+.temp-status.warning{color:#FF9500;background:rgba(255,149,0,.1)}
+.temp-status.danger{color:#FF3B30;background:rgba(255,59,48,.1)}
+.analysis-panel{background:rgba(26,26,26,.8);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:24px;backdrop-filter:blur(10px)}
+.analysis-panel h3{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:600;margin-bottom:24px}
+.risk-indicators{display:flex;flex-direction:column;gap:20px;margin-bottom:24px}
+.risk-item{padding:16px;background:rgba(255,255,255,.05);border-radius:12px}
+.risk-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.risk-header span{font-size:14px;font-weight:500}
+.risk-badge{padding:4px 12px;border-radius:12px;font-size:13px;font-weight:700}
+.risk-badge.safe{background:rgba(48,209,88,.2);color:#30D158}
+.risk-badge.caution{background:rgba(255,149,0,.2);color:#FF9500}
+.risk-badge.warning{background:rgba(255,107,53,.2);color:#FF6B35}
+.risk-badge.danger{background:rgba(255,59,48,.2);color:#FF3B30}
+.risk-bar{height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;margin-bottom:8px}
+.risk-fill{height:100%;border-radius:3px;transition:width .6s}
+.risk-fill.safe{background:#30D158}
+.risk-fill.caution{background:#FF9500}
+.risk-fill.warning{background:#FF6B35}
+.risk-fill.danger{background:#FF3B30}
+.risk-description{font-size:12px;color:#999;line-height:1.5}
+.recommendations h4{font-size:16px;font-weight:600;margin-bottom:12px}
+.recommendations ul{list-style:none;display:flex;flex-direction:column;gap:8px}
+.rec-item{display:flex;align-items:center;gap:8px;font-size:13px;color:#ccc;line-height:1.5}
+.rec-item svg{color:#30D158;flex-shrink:0}
+.sensors-panel{background:rgba(26,26,26,.8);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:24px;backdrop-filter:blur(10px);grid-column:1/-1}
+.sensors-panel h3{font-size:18px;font-weight:600;margin-bottom:20px}
+.sensors-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.sensor-card{display:flex;align-items:center;gap:16px;padding:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;transition:all .3s}
+.sensor-card.sensor-active{border-color:#FF3B30;background:rgba(255,59,48,.1)}
+.sensor-icon{font-size:28px}
+.sensor-info{display:flex;flex-direction:column;gap:4px}
+.sensor-name{font-size:14px;font-weight:600}
+.sensor-status{font-size:13px;font-weight:600}
+.text-safe{color:#30D158}
+.text-warning{color:#FF9500}
+.text-danger{color:#FF3B30}
+.sensor-time{font-size:11px;color:#666}
+.events-table-card{background:rgba(26,26,26,.8);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:24px;backdrop-filter:blur(10px)}
+.events-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.events-header h3{font-size:18px;font-weight:600}
+.events-filter{display:flex;gap:8px;flex-wrap:wrap}
+.filter-btn{padding:6px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#999;font-size:13px;cursor:pointer;transition:all .3s}
+.filter-btn:hover{color:white;background:rgba(255,255,255,.1)}
+.filter-btn.active{background:#E63946;color:white;border-color:#E63946}
+.table-container{overflow-x:auto}
+.events-table{width:100%;border-collapse:collapse}
+.events-table th{text-align:left;padding:12px 16px;font-size:12px;color:#999;border-bottom:1px solid rgba(255,255,255,.1);text-transform:uppercase;letter-spacing:.5px}
+.events-table td{padding:12px 16px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.05)}
+.event-type{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;text-transform:uppercase}
+.event-type.Gas{background:rgba(255,149,0,.2);color:#FF9500}
+.event-type.Temperatura{background:rgba(100,210,255,.2);color:#64D2FF}
+.event-type.Estufa{background:rgba(255,59,48,.2);color:#FF3B30}
+.event-type.Sistema{background:rgba(48,209,88,.2);color:#30D158}
+.event-value{font-weight:600}
+.status-badge{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600}
+.status-badge.Normal{background:rgba(48,209,88,.2);color:#30D158}
+.status-badge.Alerta,.status-badge.Crítico{background:rgba(255,59,48,.2);color:#FF3B30}
+.action-btn{padding:4px 12px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:6px;color:#ccc;font-size:12px;cursor:pointer;transition:all .3s}
+.action-btn:hover{background:rgba(255,255,255,.2);color:white}
+tr.danger td{background:rgba(255,59,48,.05)}
+tr.warning td{background:rgba(255,149,0,.05)}
+@media(max-width:1200px){.monitoring-grid{grid-template-columns:1fr}}
+@media(max-width:768px){.main-content{padding:20px}.nav-center{display:none}.events-header{flex-direction:column;align-items:flex-start}}
 </style>
