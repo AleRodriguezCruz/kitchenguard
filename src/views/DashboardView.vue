@@ -552,16 +552,18 @@ const actualizarGraficoGas = (ctx, width, height) => {
   for (let i=0;i<=100;i+=20) { const y = padding.top+chartHeight-(i/100*chartHeight); ctx.fillText(i+'%', padding.left-30, y+4) }
 }
 
-// ─── API ─────────────────────────────────────────────────────
+// API──────────────────────────────────────────────────
 const fetchStatus = async () => {
   try {
-    const res = await fetch(`${API_BASE}/status`)
+    const res = await fetch(`${API_BASE}/api/sensor/latest`)
     const data = await res.json()
     status.value = data
     connected.value = true
     analizarRiesgos()
     generarAlertas()
-  } catch { connected.value = false }
+  } catch {
+    connected.value = false
+  }
 }
 
 const descartarAlerta = async (alertaId) => {
