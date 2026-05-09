@@ -487,13 +487,52 @@ const generarRecomendaciones = () => {
   recomendaciones.value = recs
 }
 
+
 const generarAlertas = () => {
-  const nuevasAlertas = []
   const ahora = new Date().toLocaleTimeString()
-  if (status.value.gas_level >= 70) nuevasAlertas.push({ id: ++alertaCounter.value, tipo: 'gas', titulo: '¡FUGA DE GAS!', mensaje: `Nivel: ${status.value.gas_level}%`, nivel: 10, timestamp: ahora })
-  else if (status.value.gas_level >= 45) nuevasAlertas.push({ id: ++alertaCounter.value, tipo: 'gas', titulo: 'Alerta de Gas', mensaje: `Concentración: ${status.value.gas_level}%`, nivel: 7, timestamp: ahora })
-  if (status.value.temperature >= 60) nuevasAlertas.push({ id: ++alertaCounter.value, tipo: 'temperatura', titulo: 'Sobrecalentamiento', mensaje: `Temp: ${status.value.temperature}°C`, nivel: 9, timestamp: ahora })
-  alertasActivas.value = [...nuevasAlertas, ...alertasActivas.value].slice(0, 5)
+  
+  // ✅ Verificar si ya existe una alerta activa del mismo tipo
+  const yaHayAlertaGas = alertasActivas.value.some(a => a.tipo === 'gas')
+  const yaHayAlertaTemp = alertasActivas.value.some(a => a.tipo === 'temperatura')
+  
+  // Solo crear alerta de gas si NO hay una activa
+  if (status.value.gas_level >= 70 && !yaHayAlertaGas) {
+    alertasActivas.value.unshift({
+      id: ++alertaCounter.value, tipo: 'gas',
+      titulo: '¡FUGA DE GAS!', mensaje: `Nivel: ${status.value.gas_level}%`,
+      nivel: 10, timestamp: ahora
+    })
+  } else if (status.value.gas_level >= 45 && !yaHayAlertaGas) {
+    alertasActivas.value.unshift({
+      id: ++alertaCounter.value, tipo: 'gas',
+      titulo: 'Alerta de Gas', mensaje: `Concentración: ${status.value.gas_level}%`,
+      nivel: 7, timestamp: ahora
+    })
+  }
+  
+  // Quitar alerta de gas si volvió a la normalidad
+  if (status.value.gas_level < 20) {
+    alertasActivas.value = alertasActivas.value.filter(a => a.tipo !== 'gas')
+  }
+  
+  // Solo crear alerta de temperatura si NO hay una activa
+  if (status.value.temperature >= 60 && !yaHayAlertaTemp) {
+    alertasActivas.value.unshift({
+      id: ++alertaCounter.value, tipo: 'temperatura',
+      titulo: 'Sobrecalentamiento', mensaje: `Temp: ${status.value.temperature}°C`,
+      nivel: 9, timestamp: ahora
+    })
+  }
+  
+  // Quitar alerta de temperatura si volvió a la normalidad
+  if (status.value.temperature < 40) {
+    alertasActivas.value = alertasActivas.value.filter(a => a.tipo !== 'temperatura')
+  }
+  
+  // Mantener máximo 3 alertas
+  if (alertasActivas.value.length > 3) {
+    alertasActivas.value = alertasActivas.value.slice(0, 3)
+  }
 }
 
 // ─── Gráfica de Gas ──────────────────────────────────────────
