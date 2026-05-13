@@ -1,14 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { supabase } from '../lib/supabaseClient'
-import LoginView from '../views/LoginView.vue'
-import DashboardView from '../views/DashboardView.vue'
-import TimersView from '../views/TimersView.vue'
-import HistorialView from '../views/HistorialView.vue'
-import SetupView from '../views/SetupView.vue'
+import LoginView        from '../views/LoginView.vue'
+import DashboardView    from '../views/DashboardView.vue'
+import TimersView       from '../views/TimersView.vue'
+import HistorialView    from '../views/HistorialView.vue'
+import ResetPasswordView from '../views/ResetPasswordView.vue'
 
 const routes = [
-  { path: '/', redirect: '/login' },
-  { path: '/login', component: LoginView },
+  { path: '/',               redirect: '/login' },
+  { path: '/login',          component: LoginView },
+  { path: '/reset-password', component: ResetPasswordView },
   {
     path: '/dashboard',
     component: DashboardView,
@@ -23,18 +24,6 @@ const routes = [
     path: '/historial',
     component: HistorialView,
     meta: { requiresAuth: true }
-  },
-  {
-    path: '/setup/:code?',
-    name: 'setup',
-    component: SetupView,
-    meta: { requiresAuth: false }
-  },
-  {
-    path: '/generate-qr',
-    name: 'qr-generator',
-    component: () => import('../views/QRGeneratorView.vue'),
-    meta: { requiresAuth: true }
   }
 ]
 
@@ -44,14 +33,10 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
-  // Desactivado temporalmente para probar setup
-  return true
+  if (to.meta.requiresAuth) {
+    const { data } = await supabase.auth.getSession()
+    if (!data.session) return '/login'
+  }
 })
 
 export default router
-
-
-
-
-
-
