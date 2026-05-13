@@ -15,10 +15,22 @@ export function useAuth() {
     return data
   }
 
-  const logout = async () => {
+  // src/composables/useAuth.js
+const logout = async () => {
+  try {
     await supabase.auth.signOut()
-    user.value = null
+    
+    // 🔒 LIMPIAR HISTORIAL COMPLETAMENTE
+    // Esto evita que se pueda volver atrás con las flechas
+    window.location.href = '/login'
+    
+    // No usar router.push porque mantiene el historial
+    // router.push('/login')
+    
+  } catch (error) {
+    console.error('Error al cerrar sesión:', error)
   }
+}
 
   const getSession = async () => {
     const { data } = await supabase.auth.getSession()
