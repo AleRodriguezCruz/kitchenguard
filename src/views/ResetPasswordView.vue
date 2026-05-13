@@ -78,22 +78,26 @@ const error = ref('')
 const mensaje = ref('')
 const loading = ref(false)
 
+
+  
 onMounted(async () => {
-  // Supabase manda el token en el hash de la URL
-  const hash = window.location.hash
-  if (hash && hash.includes('access_token')) {
-    const params = new URLSearchParams(hash.substring(1))
-    const accessToken = params.get('access_token')
-    const refreshToken = params.get('refresh_token')
-    if (accessToken) {
-      const { error: err } = await supabase.auth.setSession({ 
-        access_token: accessToken, 
-        refresh_token: refreshToken 
-      })
-      if (err) {
-        error.value = 'El enlace ha expirado. Solicita uno nuevo.'
-      }
+  // Supabase manda los tokens en el hash de la URL
+  const hashParams = new URLSearchParams(window.location.hash.substring(1))
+  const accessToken  = hashParams.get('access_token')
+  const refreshToken = hashParams.get('refresh_token')
+  const type         = hashParams.get('type')
+
+  if (type === 'recovery' && accessToken) {
+    const { error } = await supabase.auth.setSession({
+      access_token:  accessToken,
+      refresh_token: refreshToken
+    })
+    if (error) {
+      errorMsg.value = 'Enlace inválido o expirado. Solicita uno nuevo.'
     }
+  } else {
+    // Si no viene del enlace redirige al login
+    router.push('/login')
   }
 })
 
