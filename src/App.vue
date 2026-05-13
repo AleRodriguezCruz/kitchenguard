@@ -4,15 +4,28 @@
 
 <script setup>
 import { onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuth } from './composables/useAuth'
+import { useRouter, useRoute } from 'vue-router'
+import { supabase } from './lib/supabaseClient'
 
-const router     = useRouter()
-const { getSession } = useAuth()
+const router = useRouter()
+const route  = useRoute()
 
 onMounted(async () => {
-  const session = await getSession()
-  if (session) {
+  // Si viene del enlace de recuperación de contraseña
+  const hash = window.location.hash
+  if (hash && hash.includes('type=recovery')) {
+    router.push('/reset-password')
+    return
+  }
+
+  // Si ya está en reset-password o login no hacer nada
+  if (route.path === '/reset-password' || route.path === '/login') {
+    return
+  }
+
+  // Verificar sesión normal
+  const { data } = await supabase.auth.getSession()
+  if (data.session) {
     router.push('/dashboard')
   } else {
     router.push('/login')
