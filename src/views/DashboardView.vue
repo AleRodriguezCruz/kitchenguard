@@ -471,8 +471,8 @@ const analizarRiesgos = () => {
   else riesgoEstufa.value = { porcentaje: 0, nivel: 'safe', mensaje: 'Apagada y segura' }
 
   if (deltaTemp > 25) riesgoTemp.value = { porcentaje: 95, nivel: 'danger', mensaje: `¡Incendio! ${temp}°C vs ${refTemp}°C esperado` }
-  else if (deltaTemp > 15) riesgoTemp.value = { porcentaje: 75, nivel: 'warning', mensaje: `Peligro: Δ${deltaTemp.toFixed(1)}°C` }
-  else if (deltaTemp > 8) riesgoTemp.value = { porcentaje: 45, nivel: 'caution', mensaje: 'Por encima de lo esperado' }
+  else if (deltaTemp > 20) riesgoTemp.value = { porcentaje: 75, nivel: 'warning', mensaje: `Peligro: Δ${deltaTemp.toFixed(1)}°C` }
+  else if (deltaTemp > 15) riesgoTemp.value = { porcentaje: 45, nivel: 'caution', mensaje: 'Por encima de lo esperado' }
   else riesgoTemp.value = { porcentaje: Math.round(20 * humidityFactor), nivel: 'safe', mensaje: 'Normal para Ensenada' }
 
   generarRecomendaciones()
