@@ -99,26 +99,11 @@ onMounted(async () => {
 })
 
 const updatePassword = async () => {
-  error.value = ''
-  message.value = ''
-
-  if (password.value.length < 6) {
-    error.value = 'La contraseña debe tener al menos 6 caracteres'
-    return
-  }
-
-  if (password.value !== confirmPassword.value) {
-    error.value = 'Las contraseñas no coinciden'
-    return
-  }
-
-  loading.value = true
-
+  // ... validaciones ...
+  
   const { error: updateError } = await supabase.auth.updateUser({
     password: password.value
   })
-
-  loading.value = false
 
   if (updateError) {
     error.value = updateError.message
@@ -126,6 +111,9 @@ const updatePassword = async () => {
   }
 
   message.value = 'Contraseña actualizada correctamente'
+
+  // ✅ Cerrar sesión antes de redirigir
+  await supabase.auth.signOut()
 
   setTimeout(() => {
     router.push('/login')
