@@ -165,57 +165,71 @@
             </div>
           </div>
 
-            <!-- Indicador de Temperatura -->
-  <div class="gauge-card">
-    <h4>Temperatura Ambiente</h4>
-    <div class="temp-display">
-      ...
-    </div>
-  </div>
-</div>
+          <!-- Indicador de Temperatura -->
+          <div class="gauge-card">
+            <h4>Temperatura Ambiente</h4>
+            <div class="temp-display">
+              <div class="temp-value" :class="tempLevelClass">
+                {{ status.temperature }}°
+              </div>
+              <div class="temp-scale">
+                <div class="scale-marks">
+                  <span>0°</span><span>25°</span><span>50°</span><span>75°</span><span>100°</span>
+                </div>
+                <div class="scale-bar">
+                  <div class="scale-fill" :style="{ width: (status.temperature / 100 * 100) + '%' }"></div>
+                </div>
+              </div>
+              <div class="temp-status" :class="tempLevelClass">
+                {{ tempMessage }}
+              </div>
+            </div>
+          </div>
+        </div>
 
-<!-- 🌤️ CLIMA EXTERIOR - AGREGADO AQUÍ -->
-<div class="weather-card">
-  <div class="weather-header">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M12 2v4M12 22v-4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-      <circle cx="12" cy="12" r="4"/>
-    </svg>
-    <h4>Clima en Ensenada, B.C.</h4>
-    <span class="weather-badge">Exterior</span>
-  </div>
-  
-  <div class="weather-content" v-if="!climaExterior.loading">
-    <div class="weather-temp">
-      <span class="temp-value">{{ climaExterior.temp }}°C</span>
-      <span class="temp-feels">sensación {{ climaExterior.feels_like }}°C</span>
-    </div>
-    <div class="weather-compare">
-      <div class="compare-item">
-        <span class="compare-label">Algoritmo:</span>
-        <span class="compare-value">{{ temperaturaEsperada }}°C</span>
-      </div>
-      <div class="compare-item">
-        <span class="compare-label">Diferencia:</span>
-        <span :class="['compare-diff', diferenciaClima > 0 ? 'hotter' : 'colder']">
-          {{ diferenciaClima > 0 ? '+' : '' }}{{ diferenciaClima }}°C
-        </span>
-      </div>
-    </div>
-    <div class="weather-desc">
-      <span>{{ climaExterior.description }}</span>
-    </div>
-  </div>
-  
-  <div class="weather-loading" v-else>
-    <span>Cargando clima...</span>
-  </div>
-  
-  <div class="weather-algorithm-info">
-    <span>📅 {{ new Date().toLocaleString('es-MX', { month: 'long' }) }}</span>
-    <span>⏰ {{ new Date().getHours() }}h - ajuste {{ getHourAdjustment() >= 0 ? '+' : '' }}{{ getHourAdjustment() }}°C</span>
-  </div>
-</div>
+        <!-- 🌤️ CLIMA EXTERIOR - Ensenada, B.C. -->
+        <div class="weather-card">
+          <div class="weather-header">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2v4M12 22v-4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+              <circle cx="12" cy="12" r="4"/>
+            </svg>
+            <h4>Clima en Ensenada, B.C.</h4>
+            <span class="weather-badge">Exterior</span>
+          </div>
+          
+          <div class="weather-content" v-if="!climaExterior.loading">
+            <div class="weather-temp">
+              <span class="temp-value">{{ climaExterior.temp }}°C</span>
+              <span class="temp-feels">sensación {{ climaExterior.feels_like }}°C</span>
+            </div>
+            <div class="weather-compare">
+              <div class="compare-item">
+                <span class="compare-label">Algoritmo:</span>
+                <span class="compare-value">{{ temperaturaEsperada }}°C</span>
+              </div>
+              <div class="compare-item">
+                <span class="compare-label">Diferencia:</span>
+                <span :class="['compare-diff', diferenciaClima > 0 ? 'hotter' : 'colder']">
+                  {{ diferenciaClima > 0 ? '+' : '' }}{{ diferenciaClima }}°C
+                </span>
+              </div>
+            </div>
+            <div class="weather-desc">
+              <span>{{ climaExterior.description }}</span>
+            </div>
+          </div>
+          
+          <div class="weather-loading" v-else>
+            <span>Cargando clima...</span>
+          </div>
+          
+          <div class="weather-algorithm-info">
+            <span>📅 {{ new Date().toLocaleString('es-MX', { month: 'long' }) }}</span>
+            <span>⏰ {{ new Date().getHours() }}h - ajuste {{ getHourAdjustment() >= 0 ? '+' : '' }}{{ getHourAdjustment() }}°C</span>
+          </div>
+        </div>
+
         <!-- Panel de Análisis Predictivo -->
         <div class="analysis-panel">
           <h3>
@@ -398,12 +412,12 @@ const maxDataPoints = 60
 let chartInterval = null
 let eventInterval = null
 let statusInterval = null
+let climaInterval = null
 
 // Sistema de Alertas
 const alertasActivas = ref([])
 const alertaCounter = ref(0)
 const recomendaciones = ref([])
-
 
 // Análisis de Riesgo
 const riesgoFuga = ref({
@@ -446,6 +460,56 @@ const getHourAdjustment = () => {
   if (hour >= 3 && hour <= 7) return -3
   if (hour >= 12 && hour <= 16) return +3
   return 0
+}
+
+// ─── CLIMA EXTERIOR ─────────────────────────────────────────
+const climaExterior = ref({
+  temp: null,
+  feels_like: null,
+  description: '',
+  loading: true
+})
+
+const temperaturaEsperada = computed(() => {
+  return getEnsenadaReferenceTemp() + getHourAdjustment()
+})
+
+const diferenciaClima = computed(() => {
+  if (!climaExterior.value.temp) return 0
+  return climaExterior.value.temp - temperaturaEsperada.value
+})
+
+const getWeatherDescription = (code) => {
+  const weatherCodes = {
+    0: 'Despejado', 1: 'Mayormente despejado', 2: 'Parcialmente nublado',
+    3: 'Nublado', 45: 'Niebla', 51: 'Llovizna ligera', 61: 'Lluvia ligera',
+    71: 'Nieve ligera', 80: 'Chubascos'
+  }
+  return weatherCodes[code] || 'Variable'
+}
+
+const fetchClimaExterior = async () => {
+  try {
+    const lat = 31.8667
+    const lon = -116.6
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`
+    const res = await fetch(url)
+    const data = await res.json()
+    
+    if (data.current_weather) {
+      climaExterior.value = {
+        temp: Math.round(data.current_weather.temperature),
+        feels_like: Math.round(data.current_weather.temperature),
+        description: getWeatherDescription(data.current_weather.weathercode),
+        loading: false
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching weather:', error)
+    climaExterior.value.loading = false
+    climaExterior.value.temp = temperaturaEsperada.value
+    climaExterior.value.description = 'Parcialmente nublado'
+  }
 }
 
 // ─── Computed ────────────────────────────────────────────────
@@ -514,14 +578,12 @@ const generarRecomendaciones = () => {
     recs.push('No encender aparatos eléctricos') 
   }
   
-  //  40°C a 45°C o mantener igual
   if (status.value.stove_on && status.value.temperature > 60) {
     recs.push('¿Necesita seguir encendida la estufa?')
   }
   
-  // 🔥  umbral de recomendación también
   const deltaTemp = status.value.temperature - (getEnsenadaReferenceTemp() + getHourAdjustment())
-  if (deltaTemp > 15) {  // ← CAMBIADO DE 40°C a deltaTemp > 15
+  if (deltaTemp > 15) {
     recs.push(`🌡️ Temperatura ${deltaTemp.toFixed(0)}°C sobre lo normal - Revisar fuentes de calor`)
   }
   
@@ -532,15 +594,12 @@ const generarRecomendaciones = () => {
   recomendaciones.value = recs
 }
 
-
 const generarAlertas = () => {
   const ahora = new Date().toLocaleTimeString()
   
-  // ✅ Verificar si ya existe una alerta activa del mismo tipo
   const yaHayAlertaGas = alertasActivas.value.some(a => a.tipo === 'gas')
   const yaHayAlertaTemp = alertasActivas.value.some(a => a.tipo === 'temperatura')
   
-  // Solo crear alerta de gas si NO hay una activa
   if (status.value.gas_level >= 70 && !yaHayAlertaGas) {
     alertasActivas.value.unshift({
       id: ++alertaCounter.value, tipo: 'gas',
@@ -555,12 +614,10 @@ const generarAlertas = () => {
     })
   }
   
-  // Quitar alerta de gas si volvió a la normalidad
   if (status.value.gas_level < 20) {
     alertasActivas.value = alertasActivas.value.filter(a => a.tipo !== 'gas')
   }
   
-  // Solo crear alerta de temperatura si NO hay una activa
   if (status.value.temperature >= 60 && !yaHayAlertaTemp) {
     alertasActivas.value.unshift({
       id: ++alertaCounter.value, tipo: 'temperatura',
@@ -569,12 +626,10 @@ const generarAlertas = () => {
     })
   }
   
-  // Quitar alerta de temperatura si volvió a la normalidad
   if (status.value.temperature < 40) {
     alertasActivas.value = alertasActivas.value.filter(a => a.tipo !== 'temperatura')
   }
   
-  // Mantener máximo 3 alertas
   if (alertasActivas.value.length > 3) {
     alertasActivas.value = alertasActivas.value.slice(0, 3)
   }
@@ -602,14 +657,12 @@ const actualizarGraficoGas = (ctx, width, height) => {
   const chartWidth = width - padding.left - padding.right
   const chartHeight = height - padding.top - padding.bottom
   
-  // Grid
   ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 1
   for (let i = 0; i <= 100; i += 25) {
     const y = padding.top + chartHeight - (i / 100 * chartHeight)
     ctx.beginPath(); ctx.setLineDash([3,3]); ctx.moveTo(padding.left, y); ctx.lineTo(width - padding.right, y); ctx.stroke(); ctx.setLineDash([])
   }
   
-  // Umbrales
   [{v:20,c:'#F97316',l:'20%'},{v:45,c:'#F59E0B',l:'45%'},{v:70,c:'#EF4444',l:'70%'}].forEach(t => {
     const y = padding.top + chartHeight - (t.v / 100 * chartHeight)
     ctx.beginPath(); ctx.setLineDash([5,5]); ctx.moveTo(padding.left, y); ctx.lineTo(width - padding.right, y)
@@ -617,7 +670,6 @@ const actualizarGraficoGas = (ctx, width, height) => {
     ctx.fillStyle = t.c; ctx.font = '10px sans-serif'; ctx.fillText(t.l, padding.left + 5, y - 5)
   })
   
-  // Datos
   if (gasHistory.value.length > 1) {
     const pts = gasHistory.value.map((v,i) => ({ x: padding.left + (i/(gasHistory.value.length-1))*chartWidth, y: padding.top + chartHeight - (v/100*chartHeight) }))
     ctx.beginPath(); ctx.moveTo(pts[0].x, padding.top+chartHeight); pts.forEach(p => ctx.lineTo(p.x, p.y)); ctx.lineTo(pts[pts.length-1].x, padding.top+chartHeight); ctx.closePath()
@@ -630,7 +682,6 @@ const actualizarGraficoGas = (ctx, width, height) => {
     ctx.fillStyle='white'; ctx.font='bold 12px sans-serif'; ctx.fillText(status.value.gas_level+'%', lp.x+10, lp.y-10)
   }
   
-  // Ejes
   ctx.strokeStyle='rgba(255,255,255,.2)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(padding.left,padding.top); ctx.lineTo(padding.left,padding.top+chartHeight); ctx.lineTo(width-padding.right,padding.top+chartHeight); ctx.stroke()
   ctx.fillStyle='#999'; ctx.font='10px sans-serif'
   for (let i=0;i<=100;i+=20) { const y = padding.top+chartHeight-(i/100*chartHeight); ctx.fillText(i+'%', padding.left-30, y+4) }
@@ -672,7 +723,9 @@ const simularDatosEventos = () => {
 // ─── Ciclo de vida ───────────────────────────────────────────
 onMounted(() => {
   fetchStatus()
+  fetchClimaExterior()
   statusInterval = setInterval(fetchStatus, 3000)
+  climaInterval = setInterval(fetchClimaExterior, 600000)
   setTimeout(() => inicializarGraficoGas(), 100)
   eventos.value = eventosEjemplo
   eventInterval = setInterval(simularDatosEventos, 8000)
@@ -682,6 +735,7 @@ onUnmounted(() => {
   clearInterval(statusInterval)
   clearInterval(chartInterval)
   clearInterval(eventInterval)
+  if (climaInterval) clearInterval(climaInterval)
 })
 </script>
 
@@ -824,6 +878,135 @@ onUnmounted(() => {
 .action-btn:hover{background:rgba(255,255,255,.2);color:white}
 tr.danger td{background:rgba(255,59,48,.05)}
 tr.warning td{background:rgba(255,149,0,.05)}
+
+/* 🌤️ CLIMA EXTERIOR - ESTILOS NUEVOS */
+.weather-card {
+  background: rgba(26, 26, 26, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+  grid-column: 1 / -1;
+  margin-bottom: 0;
+}
+
+.weather-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.weather-header h4 {
+  color: #F97316;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.weather-badge {
+  background: rgba(249, 115, 22, 0.15);
+  color: #F97316;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: auto;
+}
+
+.weather-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.weather-temp {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.temp-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.temp-feels {
+  font-size: 12px;
+  color: #999;
+}
+
+.weather-compare {
+  display: flex;
+  gap: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 6px 12px;
+  border-radius: 12px;
+}
+
+.compare-item {
+  display: flex;
+  gap: 4px;
+  font-size: 11px;
+}
+
+.compare-label {
+  color: #666;
+}
+
+.compare-value {
+  color: #ccc;
+  font-weight: 500;
+}
+
+.compare-diff {
+  font-weight: 700;
+}
+
+.compare-diff.hotter {
+  color: #FF9500;
+}
+
+.compare-diff.colder {
+  color: #64D2FF;
+}
+
+.weather-desc {
+  color: #64D2FF;
+  font-size: 13px;
+  text-transform: capitalize;
+}
+
+.weather-algorithm-info {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 10px;
+  color: #555;
+}
+
+.weather-loading {
+  color: #999;
+  font-size: 12px;
+  text-align: center;
+  padding: 12px;
+}
+
+@media (max-width: 768px) {
+  .weather-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .weather-compare {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
 @media(max-width:1200px){.monitoring-grid{grid-template-columns:1fr}}
 @media(max-width:768px){.main-content{padding:20px}.nav-center{display:none}.events-header{flex-direction:column;align-items:flex-start}}
 </style>
