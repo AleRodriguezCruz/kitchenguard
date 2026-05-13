@@ -257,6 +257,30 @@ const handleRecovery = async () => {
     loading.value = false
   }
 }
+
+
+  const handleLogin = async () => {
+  limpiar()
+  loading.value = true
+  try {
+    const { error: err } = await supabase.auth.signInWithPassword({
+      email: email.value,
+      password: password.value
+    })
+    if (err) throw err
+    
+    // ✅ Guardar token en localStorage
+    localStorage.setItem('auth_token', 'true')
+    
+    // ✅ Usar replace en lugar de push para no guardar historial
+    router.replace('/dashboard')  // ← CAMBIAR de push a replace
+    
+  } catch (e) {
+    error.value = 'Correo o contraseña incorrectos'
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <style scoped>
