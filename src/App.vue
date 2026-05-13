@@ -10,18 +10,31 @@ import { supabase } from './lib/supabaseClient'
 const router = useRouter()
 const route  = useRoute()
 
-onMounted(async () => {
-  // Rutas que nunca deben redirigir
+onMounted(() => {
+  // Escuchar cambios de autenticación de Supabase
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'PASSWORD_RECOVERY') {
+      router.push('/reset-password')
+      return
+    }
+    if (event === 'SIGNED_IN' && route.path === '/login') {
+      router.push('/dashboard')
+      return
+    }
+  })
+
+  // Rutas públicas no redirigen
   const rutasPublicas = ['/login', '/reset-password']
   if (rutasPublicas.includes(route.path)) return
 
-  // Verificar sesión normal
-  const { data } = await supabase.auth.getSession()
-  if (data.session) {
-    router.push('/dashboard')
-  } else {
-    router.push('/login')
-  }
+  // Verificar sesión al cargar
+  supabase.auth.getSession().then(({ data }) => {
+    if (data.session) {
+      router.push('/dashboard')
+    } else {
+      router.push('/login')
+    }
+  })
 })
 </script>
 
