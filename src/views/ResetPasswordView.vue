@@ -40,7 +40,7 @@
             <input v-model="password" type="password" placeholder="Mínimo 6 caracteres" required />
           </div>
         </div>
-        
+
         <div class="form-group">
           <label>Confirmar contraseña</label>
           <div class="input-wrapper">
@@ -52,7 +52,7 @@
           </div>
         </div>
 
-        <p v-if="error" class="error">{{ error }}</p>
+        <p v-if="error"   class="error">{{ error }}</p>
         <p v-if="mensaje" class="success">{{ mensaje }}</p>
 
         <button type="submit" :disabled="loading" class="submit-btn">
@@ -71,38 +71,34 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '../lib/supabaseClient'
 
-const router = useRouter()
-const password = ref('')
+const router          = useRouter()
+const password        = ref('')
 const passwordConfirm = ref('')
-const error = ref('')
-const mensaje = ref('')
-const loading = ref(false)
+const error           = ref('')
+const mensaje         = ref('')
+const loading         = ref(false)
 
-
-  
 onMounted(async () => {
-  // Supabase manda los tokens en el hash de la URL
-  const hashParams = new URLSearchParams(window.location.hash.substring(1))
+  const hashParams   = new URLSearchParams(window.location.hash.substring(1))
   const accessToken  = hashParams.get('access_token')
   const refreshToken = hashParams.get('refresh_token')
   const type         = hashParams.get('type')
 
   if (type === 'recovery' && accessToken) {
-    const { error } = await supabase.auth.setSession({
+    const { error: err } = await supabase.auth.setSession({
       access_token:  accessToken,
       refresh_token: refreshToken
     })
-    if (error) {
-      errorMsg.value = 'Enlace inválido o expirado. Solicita uno nuevo.'
+    if (err) {
+      error.value = 'Enlace inválido o expirado. Solicita uno nuevo.'
     }
   } else {
-    // Si no viene del enlace redirige al login
     router.push('/login')
   }
 })
 
 const handleReset = async () => {
-  error.value = ''
+  error.value   = ''
   mensaje.value = ''
 
   if (password.value !== passwordConfirm.value) {
@@ -153,35 +149,18 @@ const handleReset = async () => {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
 }
 
-.logo-section {
-  text-align: center;
-  margin-bottom: 20px;
-}
+.logo-section { text-align: center; margin-bottom: 20px; }
+.reset-subtitle { color: #94A3B8; font-size: 14px; margin-top: 12px; }
+.reset-icon { display: flex; justify-content: center; margin-bottom: 24px; }
 
-.reset-subtitle {
-  color: #94A3B8;
-  font-size: 14px;
-  margin-top: 12px;
-}
-
-.reset-icon {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 24px;
-}
-
-.reset-form {
-  animation: fadeSlideIn 0.3s ease;
-}
+.reset-form { animation: fadeSlideIn 0.3s ease; }
 
 @keyframes fadeSlideIn {
   from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.form-group {
-  margin-bottom: 18px;
-}
+.form-group { margin-bottom: 18px; }
 
 .form-group label {
   display: block;
@@ -193,17 +172,8 @@ const handleReset = async () => {
   margin-bottom: 6px;
 }
 
-.input-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.input-icon {
-  position: absolute;
-  left: 14px;
-  z-index: 1;
-}
+.input-wrapper { position: relative; display: flex; align-items: center; }
+.input-icon { position: absolute; left: 14px; z-index: 1; }
 
 input {
   width: 100%;
