@@ -8,33 +8,19 @@ import HistorialView from '../views/HistorialView.vue'
 import ResetPasswordView from '../views/ResetPasswordView.vue'
 
 const routes = [
-  {
-    path: '/',
-    redirect: '/login'
-  },
-
-  {
-    path: '/login',
-    component: LoginView
-  },
-
-  {
-    path: '/reset-password',
-    component: ResetPasswordView
-  },
-
+  { path: '/', redirect: '/login' },
+  { path: '/login', component: LoginView },
+  { path: '/reset-password', component: ResetPasswordView },
   {
     path: '/dashboard',
     component: DashboardView,
     meta: { requiresAuth: true }
   },
-
   {
     path: '/timers',
     component: TimersView,
     meta: { requiresAuth: true }
   },
-
   {
     path: '/historial',
     component: HistorialView,
@@ -47,25 +33,17 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach(async (to) => {
-
-  // Permitir acceso libre a login
-  if (to.path === '/login') {
-    return true
+router.beforeEach(async (to, from, next) => {
+  // ✅ Rutas públicas (sin autenticación)
+  const publicRoutes = ['/login', '/reset-password']
+  
+  if (publicRoutes.includes(to.path)) {
+    return true  // Permitir acceso sin verificar sesión
   }
 
-  // Permitir acceso libre a reset password
-  if (to.path === '/reset-password') {
-    return true
-  }
-
-  // Verificar autenticación
+  // ✅ Rutas protegidas
   if (to.meta.requiresAuth) {
-
-    const {
-      data: { session }
-    } = await supabase.auth.getSession()
-
+    const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return '/login'
     }
