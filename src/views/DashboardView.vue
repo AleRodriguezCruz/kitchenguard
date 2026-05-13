@@ -480,10 +480,26 @@ const analizarRiesgos = () => {
 
 const generarRecomendaciones = () => {
   const recs = []
-  if (status.value.gas_level >= 20) { recs.push('Verificar conexiones de gas'); recs.push('No encender aparatos eléctricos') }
-  if (status.value.stove_on && status.value.temperature > 60) recs.push('¿Necesita seguir encendida la estufa?')
-  if (status.value.temperature > 40) recs.push('Revisar fuentes de calor cercanas')
-  if (recs.length === 0) { recs.push('✅ Parámetros normales para Ensenada'); recs.push('✅ Monitoreo 24/7 activo') }
+  if (status.value.gas_level >= 20) { 
+    recs.push('Verificar conexiones de gas'); 
+    recs.push('No encender aparatos eléctricos') 
+  }
+  
+  //  40°C a 45°C o mantener igual
+  if (status.value.stove_on && status.value.temperature > 60) {
+    recs.push('¿Necesita seguir encendida la estufa?')
+  }
+  
+  // 🔥  umbral de recomendación también
+  const deltaTemp = status.value.temperature - (getEnsenadaReferenceTemp() + getHourAdjustment())
+  if (deltaTemp > 15) {  // ← CAMBIADO DE 40°C a deltaTemp > 15
+    recs.push(`🌡️ Temperatura ${deltaTemp.toFixed(0)}°C sobre lo normal - Revisar fuentes de calor`)
+  }
+  
+  if (recs.length === 0) { 
+    recs.push('✅ Parámetros normales para Ensenada'); 
+    recs.push('✅ Monitoreo 24/7 activo') 
+  }
   recomendaciones.value = recs
 }
 
