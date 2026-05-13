@@ -230,15 +230,29 @@ const handleRegistro = async () => {
 const handleRecovery = async () => {
   limpiar()
   loading.value = true
+
   try {
-    const { error: err } = await supabase.auth.resetPasswordForEmail(email.value, {
-      redirectTo: `${window.location.origin}/reset-password`
-    })
+    const { error: err } =
+      await supabase.auth.resetPasswordForEmail(
+        email.value,
+        {
+          redirectTo:
+            `${window.location.origin}/reset-password`
+        }
+      )
+
     if (err) throw err
-    mensaje.value = '¡Enlace enviado! Revisa tu correo.'
+
+    mensaje.value =
+      '¡Enlace enviado! Revisa tu correo electrónico.'
+
     email.value = ''
+
   } catch (e) {
-    error.value = 'Error al enviar el enlace'
+    console.error(e)
+
+    error.value =
+      e.message || 'Error al enviar el enlace'
   } finally {
     loading.value = false
   }
