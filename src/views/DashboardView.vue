@@ -165,28 +165,57 @@
             </div>
           </div>
 
-          <!-- Indicador de Temperatura -->
-          <div class="gauge-card">
-            <h4>Temperatura Ambiente</h4>
-            <div class="temp-display">
-              <div class="temp-value" :class="tempLevelClass">
-                {{ status.temperature }}°
-              </div>
-              <div class="temp-scale">
-                <div class="scale-marks">
-                  <span>0°</span><span>25°</span><span>50°</span><span>75°</span><span>100°</span>
-                </div>
-                <div class="scale-bar">
-                  <div class="scale-fill" :style="{ width: (status.temperature / 100 * 100) + '%' }"></div>
-                </div>
-              </div>
-              <div class="temp-status" :class="tempLevelClass">
-                {{ tempMessage }}
-              </div>
-            </div>
-          </div>
-        </div>
+            <!-- Indicador de Temperatura -->
+  <div class="gauge-card">
+    <h4>Temperatura Ambiente</h4>
+    <div class="temp-display">
+      ...
+    </div>
+  </div>
+</div>
 
+<!-- 🌤️ CLIMA EXTERIOR - AGREGADO AQUÍ -->
+<div class="weather-card">
+  <div class="weather-header">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 2v4M12 22v-4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+      <circle cx="12" cy="12" r="4"/>
+    </svg>
+    <h4>Clima en Ensenada, B.C.</h4>
+    <span class="weather-badge">Exterior</span>
+  </div>
+  
+  <div class="weather-content" v-if="!climaExterior.loading">
+    <div class="weather-temp">
+      <span class="temp-value">{{ climaExterior.temp }}°C</span>
+      <span class="temp-feels">sensación {{ climaExterior.feels_like }}°C</span>
+    </div>
+    <div class="weather-compare">
+      <div class="compare-item">
+        <span class="compare-label">Algoritmo:</span>
+        <span class="compare-value">{{ temperaturaEsperada }}°C</span>
+      </div>
+      <div class="compare-item">
+        <span class="compare-label">Diferencia:</span>
+        <span :class="['compare-diff', diferenciaClima > 0 ? 'hotter' : 'colder']">
+          {{ diferenciaClima > 0 ? '+' : '' }}{{ diferenciaClima }}°C
+        </span>
+      </div>
+    </div>
+    <div class="weather-desc">
+      <span>{{ climaExterior.description }}</span>
+    </div>
+  </div>
+  
+  <div class="weather-loading" v-else>
+    <span>Cargando clima...</span>
+  </div>
+  
+  <div class="weather-algorithm-info">
+    <span>📅 {{ new Date().toLocaleString('es-MX', { month: 'long' }) }}</span>
+    <span>⏰ {{ new Date().getHours() }}h - ajuste {{ getHourAdjustment() >= 0 ? '+' : '' }}{{ getHourAdjustment() }}°C</span>
+  </div>
+</div>
         <!-- Panel de Análisis Predictivo -->
         <div class="analysis-panel">
           <h3>
