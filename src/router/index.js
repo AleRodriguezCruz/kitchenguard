@@ -38,18 +38,18 @@ router.beforeEach(async (to, from, next) => {
   const publicRoutes = ['/login', '/reset-password']
   
   if (publicRoutes.includes(to.path)) {
-    return true  // Permitir acceso sin verificar sesión
+    return next()  // ← Cambiado: usar next() en lugar de return true
   }
 
   // ✅ Rutas protegidas
   if (to.meta.requiresAuth) {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
-      return '/login'
+      return next('/login')  // ← Cambiado: usar next('/login') en lugar de return '/login'
     }
   }
 
-  return true
+  next()  // ← Cambiado: llamar a next() en lugar de return true
 })
 
 export default router
