@@ -232,7 +232,7 @@ const handleRecovery = async () => {
   loading.value = true
   try {
     const { error: err } = await supabase.auth.resetPasswordForEmail(email.value, {
-      redirectTo: `${window.location.origin}/dashboard`
+      redirectTo: `${window.location.origin}/reset-password`
     })
     if (err) throw err
     mensaje.value = '¡Enlace enviado! Revisa tu correo.'
