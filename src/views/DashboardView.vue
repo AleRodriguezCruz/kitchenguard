@@ -403,7 +403,8 @@ const { logout } = useAuth()
 
 const API_BASE = import.meta.env.VITE_API_BASE
 const connected = ref(false)
-const panicActivo = ref(false)
+const panicEventoActivo = ref(null)   // guarda el objeto completo, no solo un bool
+
 const status = ref({ stove_on: false, gas_level: 0, temperature: 22, humidity: 55, panic: false })
 
 // Variables para gráficos y timers
@@ -633,14 +634,15 @@ const generarAlertas = () => {
     alertasActivas.value = alertasActivas.value.filter(a => a.tipo !== 'temperatura')
   }
 
-  if (panicActivo.value && !yaHayPanico) {
+  if (panicEventoActivo.value && !yaHayPanico) {
   alertasActivas.value.unshift({
-    id: ++alertaCounter.value,
-    tipo: 'estufa',
-    titulo: '🆘 BOTON DE PANICO',
-    mensaje: 'Emergencia enviada desde KitchenGuard',
-    nivel: 10,
-    timestamp: ahora
+    id:        ++alertaCounter.value,
+    tipo:      'estufa',
+    titulo:    '🆘 BOTON DE PANICO',
+    mensaje:   'Emergencia enviada desde KitchenGuard',
+    nivel:     10,
+    timestamp: new Date().toLocaleTimeString(),
+    panicId:   panicEventoActivo.value.id   //guardamos el ID del evento
   })
 }
   // Mantener máximo 3 alertas
@@ -719,28 +721,38 @@ const fetchStatus = async () => {
 
 const fetchPanic = async () => {
   try {
-    const res = await fetch(`${API_BASE}/api/panic`)
+    const res  = await fetch(`${API_BASE}/api/panic/activo`)
     const data = await res.json()
-
-    if (data.length > 0) {
-      const ultimo = data[0]
-
-      const tiempoEvento = new Date(ultimo.timestamp).getTime()
-      const ahora = Date.now()
-
-      panicActivo.value = (ahora - tiempoEvento) < 10000
-    }
-
+    panicEventoActivo.value = data   // null si no hay nada activo
   } catch (err) {
     console.error("Error panic:", err)
   }
 }
 
+
 const descartarAlerta = async (alertaId) => {
+
+  const alerta = alertasActivas.value.find(a => a.id === alertaId)
+
+  // Si es una alerta de pánico, marcarla como atendida en el backend
+  if (alerta?.panicId) {
+    try {
+      await fetch(`${API_BASE}/api/panic/${alerta.panicId}/atender`, {
+        method: 'POST'
+      })
+      panicEventoActivo.value = null   // limpiar estado local inmediatamente
+    } catch (err) {
+      console.error("Error al atender pánico:", err)
+    }
+  }
+
   alertasActivas.value = alertasActivas.value.filter(a => a.id !== alertaId)
   if (status.value.stove_on) {
-    await fetch(`${API_BASE}/api/sensor`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({type:'gas',value:0,alert:0}) })
-    status.value.stove_on = false; status.value.gas_level = 0
+    await fetch(`${API_BASE}/api/sensor`, { method:'POST', 
+    headers:{'Content-Type':'application/json'}, body:JSON.stringify({type:'gas',value:0,alert:0}) 
+  })
+    status.value.stove_on = false; 
+    status.value.gas_level = 0
   }
 }
 
@@ -756,6 +768,7 @@ const simularDatosEventos = () => {
 }
 
 // ─── Ciclo de vida ───────────────────────────────────────────
+let panicInterval = null 
 onMounted(() => {
   fetchStatus()
   fetchClimaExterior()
@@ -763,15 +776,16 @@ onMounted(() => {
   climaInterval = setInterval(fetchClimaExterior, 600000)
   setTimeout(() => inicializarGraficoGas(), 100)
   eventos.value = eventosEjemplo
-  eventInterval = setInterval(simularDatosEventos, 8000)
+  eventInterval = setInterval(simularDatosEventos, 8000) 
   fetchPanic()
-  setInterval(fetchPanic, 3000)
+  panicInterval = setInterval(fetchPanic, 3000)
 })
 
 onUnmounted(() => {
   clearInterval(statusInterval)
   clearInterval(chartInterval)
   clearInterval(eventInterval)
+  clearInterval(panicInterval)
   if (climaInterval) clearInterval(climaInterval)
 })
 </script>
