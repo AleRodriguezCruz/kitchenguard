@@ -228,14 +228,16 @@ const getTypeClass = (type) => {
 const formatDate = (timestamp) => {
   if (!timestamp) return '—'
   try {
-    const date = new Date(timestamp)
+    
+    const date = new Date(timestamp.includes('Z') ? timestamp : timestamp + 'Z')
     return date.toLocaleString('es-MX', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-      second: '2-digit'
+      second: '2-digit',
+      timeZone: 'America/Ensenada'
     })
   } catch {
     return timestamp
