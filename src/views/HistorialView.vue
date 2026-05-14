@@ -247,7 +247,11 @@ const panicosPaginados = computed(() => {
 const todosCombinados = computed(() => {
   const sens = sensores.value.map(s => ({ ...s, _tabla: 'sensor' }))
   const pan  = panicos.value.map(p => ({ ...p, _tabla: 'panico' }))
-  return [...sens, ...pan].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+  return [...sens, ...pan].sort((a, b) => {
+    const fechaA = new Date(a.timestamp.includes('Z') ? a.timestamp : a.timestamp + 'Z')
+    const fechaB = new Date(b.timestamp.includes('Z') ? b.timestamp : b.timestamp + 'Z')
+    return fechaB - fechaA
+  })
 })
 
 const todosPaginados = computed(() => {
