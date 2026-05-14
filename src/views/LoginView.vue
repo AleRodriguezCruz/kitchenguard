@@ -1,7 +1,6 @@
 <template>
   <div class="login-container">
     <div class="login-card">
-      <!-- Logo KitchenGuard Profesional -->
       <div class="logo-section">
         <svg width="200" height="56" viewBox="0 0 240 60" fill="none" xmlns="http://www.w3.org/2000/svg" class="logo-svg">
           <defs>
@@ -25,7 +24,6 @@
         <p class="logo-subtitle">Sistema inteligente de seguridad del hogar</p>
       </div>
 
-      <!-- TABS -->
       <div class="tabs">
         <button :class="['tab', modo === 'login' ? 'active' : '']" @click="modo = 'login'; limpiar()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -46,7 +44,6 @@
         </button>
       </div>
 
-      <!-- LOGIN -->
       <form v-if="modo === 'login'" @submit.prevent="handleLogin" class="form-animate">
         <div class="form-group">
           <label>Correo electrónico</label>
@@ -77,7 +74,6 @@
         <p class="link" @click="modo = 'recovery'; limpiar()">¿Olvidaste tu contraseña?</p>
       </form>
 
-      <!-- REGISTRO -->
       <form v-if="modo === 'registro'" @submit.prevent="handleRegistro" class="form-animate">
         <div class="form-group">
           <label>Correo electrónico</label>
@@ -118,7 +114,6 @@
         <p class="link" @click="modo = 'login'; limpiar()">← Volver al inicio de sesión</p>
       </form>
 
-      <!-- RECUPERAR CONTRASEÑA -->
       <form v-if="modo === 'recovery'" @submit.prevent="handleRecovery" class="form-animate">
         <div class="recovery-icon">
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="1.5">
@@ -148,7 +143,6 @@
         <p class="link" @click="modo = 'login'; limpiar()">← Volver al login</p>
       </form>
 
-      <!-- Footer -->
       <div class="login-footer">
         <router-link to="/" class="footer-link">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -191,9 +185,12 @@ const handleLogin = async () => {
     })
     if (err) throw err
     
-    // Guardar token en localStorage
+    // ✅ Guardar token en localStorage
     localStorage.setItem('auth_token', 'true')
-    router.push('/dashboard')
+    
+    // ✅ Usar replace para evitar volver atrás con las flechas del navegador
+    router.replace('/dashboard')
+    
   } catch (e) {
     error.value = 'Correo o contraseña incorrectos'
   } finally {
@@ -230,53 +227,16 @@ const handleRegistro = async () => {
 const handleRecovery = async () => {
   limpiar()
   loading.value = true
-
   try {
-    const { error: err } =
-      await supabase.auth.resetPasswordForEmail(
-        email.value,
-        {
-          redirectTo:
-            `${window.location.origin}/reset-password`
-        }
-      )
-
+    const { error: err } = await supabase.auth.resetPasswordForEmail(
+      email.value,
+      { redirectTo: `${window.location.origin}/reset-password` }
+    )
     if (err) throw err
-
-    mensaje.value =
-      '¡Enlace enviado! Revisa tu correo electrónico.'
-
+    mensaje.value = '¡Enlace enviado! Revisa tu correo electrónico.'
     email.value = ''
-
   } catch (e) {
-    console.error(e)
-
-    error.value =
-      e.message || 'Error al enviar el enlace'
-  } finally {
-    loading.value = false
-  }
-}
-
-
-  const handleLogin = async () => {
-  limpiar()
-  loading.value = true
-  try {
-    const { error: err } = await supabase.auth.signInWithPassword({
-      email: email.value,
-      password: password.value
-    })
-    if (err) throw err
-    
-    // ✅ Guardar token en localStorage
-    localStorage.setItem('auth_token', 'true')
-    
-    // ✅ Usar replace en lugar de push para no guardar historial
-    router.replace('/dashboard')  // ← CAMBIAR de push a replace
-    
-  } catch (e) {
-    error.value = 'Correo o contraseña incorrectos'
+    error.value = e.message || 'Error al enviar el enlace'
   } finally {
     loading.value = false
   }
