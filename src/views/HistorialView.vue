@@ -159,6 +159,7 @@
             <tr>
               <th>ID</th>
               <th>Estado</th>
+              <th>Notificación</th>
               <th>Fecha</th>
             </tr>
           </thead>
@@ -167,6 +168,11 @@
               <td class="cell-id">#{{ p.id }}</td>
               <td>
                 <span class="status-badge panic">🆘 Pánico Activado</span>
+              </td>
+              <td>
+              <span :class="['status-badge', p.atendido ? 'normal' : 'alert']">
+                {{ p.atendido ? '✓ Cerrada' : '🆘 Activa' }}
+              </span>
               </td>
               <td class="cell-date">{{ formatDate(p.timestamp) }}</td>
             </tr>
