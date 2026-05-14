@@ -1,12 +1,9 @@
-// src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
 import { supabase } from '../lib/supabaseClient'
-
-// Importar vistas
-import LoginView from '../views/LoginView.vue'
-import DashboardView from '../views/DashboardView.vue'
-import TimersView from '../views/TimersView.vue'
-import HistorialView from '../views/HistorialView.vue'
+import LoginView         from '../views/LoginView.vue'
+import DashboardView     from '../views/DashboardView.vue'
+import TimersView        from '../views/TimersView.vue'
+import HistorialView     from '../views/HistorialView.vue'
 import ResetPasswordView from '../views/ResetPasswordView.vue'
 
 const routes = [
@@ -15,13 +12,13 @@ const routes = [
     path: '/login',
     name: 'login',
     component: LoginView,
-    meta: { requiresAuth: false, requiresGuest: true }
+    meta: { requiresAuth: false, guestOnly: true }
   },
   {
     path: '/reset-password',
     name: 'reset-password',
     component: ResetPasswordView,
-    meta: { requiresAuth: false, requiresGuest: false }
+    meta: { requiresAuth: false }
   },
   {
     path: '/dashboard',
@@ -49,25 +46,24 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  // 1. Obtener la sesión actual de Supabase
-  const { data: { session } } = await supabase.auth.getSession()
-  const isAuthenticated = !!session
+  const { data } = await supabase.auth.getSession()
+  const isAuthenticated = !!data.session
 
-  // 2. Permitir SIEMPRE el acceso a reset-password (especialmente para el correo de recuperación)
-  if (to.path === '/reset-password') {
-    return next()
+  // Reset-password: solo si hay sesión activa (token del correo la crea)
+  if (to.name === 'reset-password') {
+    return next()  // siempre permitir, ResetPasswordView verifica el token
   }
-  
-  // 3. Ruta protegida + no autenticado -> Login
+
+  // Ruta protegida sin sesión → login
   if (to.meta.requiresAuth && !isAuthenticated) {
-    return next('/login')
+    return next({ name: 'login' })
   }
-  
-  // 4. Ya autenticado e intenta ir a Login -> Dashboard
-  if (to.path === '/login' && isAuthenticated) {
-    return next('/dashboard')
+
+  // Ya autenticado intenta ir a login → dashboard
+  if (to.meta.guestOnly && isAuthenticated) {
+    return next({ name: 'dashboard' })
   }
-  
+
   next()
 })
 
