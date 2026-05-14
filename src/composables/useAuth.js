@@ -1,41 +1,49 @@
 // src/composables/useAuth.js
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { supabase } from '../lib/supabaseClient'
 
-const user = ref(null)
+// Estado global persistente mientras la app esté abierta
+const usuarioActual = ref(null)
 
 export function useAuth() {
+  
+  // Sincronizar con Supabase inmediatamente
+  const actualizarUsuario = (user) => {
+    usuarioActual.value = user ? user : null
+  }
 
-  const login = async (email, password) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
+  // PASO CLAVE: Escuchar el evento de recuperación
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'PASSWORD_RECOVERY') {
+      console.log('Modo recuperación detectado');
+    }
+    actualizarUsuario(session?.user)
+  })
+
+  const sendPasswordReset = async (email) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      // Importante: esta URL debe estar en el Dashboard de Supabase
+      redirectTo: `${window.location.origin}/reset-password`, 
     })
     if (error) throw error
-    user.value = data.user
-    localStorage.setItem('auth_token', 'true')
-    return data
   }
 
-  const logout = async () => {
-    try {
+  const updatePassword = async (newPassword) => {
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword
+    })
+    if (error) throw error
+  }
+
+  return { 
+    user: computed(() => usuarioActual.value),
+    isAuthenticated: computed(() => !!usuarioActual.value),
+    sendPasswordReset,
+    updatePassword,
+    logout: async () => {
       await supabase.auth.signOut()
-      user.value = null
-      localStorage.removeItem('auth_token')
-      
-      // ✅ Usar replace para limpiar el historial
+      usuarioActual.value = null
       window.location.replace('/login')
-      
-    } catch (error) {
-      console.error('Error al cerrar sesión:', error)
     }
   }
-
-  const getSession = async () => {
-    const { data } = await supabase.auth.getSession()
-    user.value = data.session?.user ?? null
-    return data.session
-  }
-
-  return { user, login, logout, getSession }
 }
