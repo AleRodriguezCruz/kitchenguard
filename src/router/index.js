@@ -10,10 +10,7 @@ import HistorialView from '../views/HistorialView.vue'
 import ResetPasswordView from '../views/ResetPasswordView.vue'
 
 const routes = [
-  {
-    path: '/',
-    redirect: '/login'
-  },
+  { path: '/', redirect: '/login' },
   {
     path: '/login',
     name: 'login',
@@ -24,7 +21,7 @@ const routes = [
     path: '/reset-password',
     name: 'reset-password',
     component: ResetPasswordView,
-    meta: { requiresAuth: false, requiresGuest: false } // Permitir acceso con token
+    meta: { requiresAuth: false, requiresGuest: false }
   },
   {
     path: '/dashboard',
@@ -52,28 +49,26 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  // Permitir SIEMPRE el acceso a reset-password si viene un token en la URL
+  // 1. Obtener la sesión actual de Supabase
+  const { data: { session } } = await supabase.auth.getSession()
+  const isAuthenticated = !!session
+
+  // 2. Permitir SIEMPRE el acceso a reset-password (especialmente para el correo de recuperación)
   if (to.path === '/reset-password') {
     return next()
   }
   
-  // Resto de la lógica igual
+  // 3. Ruta protegida + no autenticado -> Login
   if (to.meta.requiresAuth && !isAuthenticated) {
     return next('/login')
   }
   
+  // 4. Ya autenticado e intenta ir a Login -> Dashboard
   if (to.path === '/login' && isAuthenticated) {
     return next('/dashboard')
   }
   
   next()
-})
-
-// Prevenir navegación con flechas después de logout
-router.afterEach((to) => {
-  if (to.path === '/login') {
-    window.history.replaceState({}, document.title, window.location.href)
-  }
 })
 
 export default router
