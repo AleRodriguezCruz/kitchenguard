@@ -136,5 +136,156 @@ const handleUpdatePassword = async () => {
 </script>
 
 <style scoped>
-/* Tu CSS se mantiene igual, está perfecto */
+.reset-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.reset-card {
+  background: rgba(26, 26, 26, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 40px;
+  max-width: 450px;
+  width: 100%;
+}
+
+.logo {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.logo h2 {
+  color: #F97316;
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.logo p {
+  color: #999;
+  font-size: 14px;
+}
+
+.reset-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  color: #ccc;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.reset-input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 14px 16px;
+  color: white;
+  font-size: 14px;
+}
+
+.reset-input:focus {
+  outline: none;
+  border-color: #F97316;
+}
+
+.reset-btn {
+  background: linear-gradient(135deg, #F97316, #EA580C);
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.reset-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.reset-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.back-login {
+  text-align: center;
+  margin-top: 24px;
+}
+
+.back-login a, .login-link {
+  color: #F97316;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.success-message {
+  text-align: center;
+}
+
+.success-icon {
+  width: 60px;
+  height: 60px;
+  background: rgba(48, 209, 88, 0.2);
+  border: 2px solid #30D158;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 32px;
+  color: #30D158;
+}
+
+.success-message h3 {
+  color: white;
+  margin-bottom: 12px;
+}
+
+.success-message p {
+  color: #999;
+  margin-bottom: 24px;
+}
+
+.login-link {
+  display: inline-block;
+  background: rgba(249, 115, 22, 0.15);
+  padding: 12px 24px;
+  border-radius: 12px;
+}
+
+.error-message {
+  background: rgba(255, 59, 48, 0.15);
+  border: 1px solid #FF3B30;
+  border-radius: 12px;
+  padding: 12px;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.error-message p {
+  color: #FF3B30;
+  font-size: 13px;
+  margin: 0;
+}
+
+.field-error {
+  color: #FF3B30;
+  font-size: 12px;
+  margin-top: -8px;
+}
 </style>
