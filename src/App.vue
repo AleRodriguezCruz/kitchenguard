@@ -11,19 +11,25 @@ const router = useRouter()
 const route  = useRoute()
 
 onMounted(() => {
-  // Escuchar cambios de autenticación de Supabase
   supabase.auth.onAuthStateChange((event, session) => {
+    // Si viene del enlace de recuperación → siempre ir a reset-password
     if (event === 'PASSWORD_RECOVERY') {
       router.push('/reset-password')
       return
     }
+    // Si hizo login normal y está en login → dashboard
     if (event === 'SIGNED_IN' && route.path === '/login') {
       router.push('/dashboard')
       return
     }
+    // Si cerró sesión → login
+    if (event === 'SIGNED_OUT') {
+      router.push('/login')
+      return
+    }
   })
 
-  // Rutas públicas no redirigen
+  // Rutas públicas no verifican sesión
   const rutasPublicas = ['/login', '/reset-password']
   if (rutasPublicas.includes(route.path)) return
 
