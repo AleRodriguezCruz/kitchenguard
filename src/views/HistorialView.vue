@@ -95,90 +95,109 @@
       </div>
 
       <!-- Tabla de Sensores -->
-      <div v-if="tab === 'sensores' || tab === 'todos'" class="table-container">
+      <div v-if="tab === 'sensores'" class="table-container">
         <div class="table-header">
           <h3>Registros de Sensores</h3>
           <span class="table-count">{{ sensores.length }} registros</span>
         </div>
         
         <div v-if="sensores.length === 0" class="empty-state">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.5">
-            <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
-            <rect x="9" y="3" width="6" height="4" rx="1"/>
-          </svg>
-          <p>Sin registros de sensores</p>
+    <p>Sin registros de sensores</p>
         </div>
-        
         <table v-else class="events-table">
           <thead>
-            <tr>
-              <th>ID</th>
-              <th>Tipo</th>
-              <th>Valor</th>
-              <th>Alerta</th>
-              <th>Fecha</th>
-            </tr>
+            <tr><th>ID</th><th>Tipo</th><th>Valor</th><th>Alerta</th><th>Fecha</th></tr>
           </thead>
           <tbody>
-            <tr v-for="s in sensores" :key="s.id" :class="s.alert ? 'row-alert' : ''">
+            <tr v-for="s in sensoresPaginados" :key="s.id" :class="s.alert ? 'row-alert' : ''">
               <td class="cell-id">#{{ s.id }}</td>
-              <td>
-                <span :class="['type-badge', getTypeClass(s.type)]">{{ s.type }}</span>
-              </td>
+              <td><span :class="['type-badge', getTypeClass(s.type)]">{{ s.type }}</span></td>
               <td class="cell-value">{{ s.value }}</td>
-              <td>
-                <span :class="['status-badge', s.alert ? 'alert' : 'normal']">
-                  {{ s.alert ? '🔥 Alerta' : '✓ Normal' }}
-                </span>
-              </td>
+              <td><span :class="['status-badge', s.alert ? 'alert' : 'normal']">{{ s.alert ? '🔥 Alerta' : '✓ Normal' }}</span></td>
               <td class="cell-date">{{ formatDate(s.timestamp) }}</td>
             </tr>
           </tbody>
         </table>
+        <div v-if="totalPaginasSensores > 1" class="pagination">
+          <button @click="paginaSensores--" :disabled="paginaSensores === 1" class="page-btn">‹</button>
+          <span class="page-info">{{ paginaSensores }} / {{ totalPaginasSensores }}</span>
+          <button @click="paginaSensores++" :disabled="paginaSensores === totalPaginasSensores" class="page-btn">›</button>
+        </div>
       </div>
 
       <!-- Tabla de Pánico -->
-      <div v-if="tab === 'panico' || tab === 'todos'" class="table-container" style="margin-top: 20px;">
+      <div v-if="tab === 'panico'" class="table-container">
         <div class="table-header">
           <h3>Registros de Pánico</h3>
           <span class="table-count">{{ panicos.length }} registros</span>
         </div>
-        
         <div v-if="panicos.length === 0" class="empty-state">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.5">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="8" x2="12" y2="12"/>
-            <line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
           <p>Sin registros de pánico</p>
           <span class="empty-sub">No se han activado alertas de emergencia</span>
         </div>
-        
         <table v-else class="events-table">
           <thead>
-            <tr>
-              <th>ID</th>
-              <th>Estado</th>
-              <th>Notificación</th>
-              <th>Fecha</th>
-            </tr>
+            <tr><th>ID</th><th>Estado</th><th>Notificación</th><th>Fecha</th></tr>
           </thead>
           <tbody>
-            <tr v-for="p in panicos" :key="p.id" class="row-panic">
+            <tr v-for="p in panicosPaginados" :key="p.id" class="row-panic">
               <td class="cell-id">#{{ p.id }}</td>
-              <td>
-                <span class="status-badge panic">🆘 Pánico Activado</span>
-              </td>
-              <td>
-              <span :class="['status-badge', p.atendido ? 'normal' : 'alert']">
-                {{ p.atendido ? '✓ Cerrada' : '🆘 Activa' }}
-              </span>
-              </td>
+              <td><span class="status-badge panic">🆘 Pánico Activado</span></td>
+              <td><span :class="['status-badge', p.atendido ? 'normal' : 'alert']">{{ p.atendido ? '✓ Cerrada' : '🆘 Activa' }}</span></td>
               <td class="cell-date">{{ formatDate(p.timestamp) }}</td>
             </tr>
           </tbody>
         </table>
+        <div v-if="totalPaginasPanicos > 1" class="pagination">
+          <button @click="paginaPanicos--" :disabled="paginaPanicos === 1" class="page-btn">‹</button>
+          <span class="page-info">{{ paginaPanicos }} / {{ totalPaginasPanicos }}</span>
+          <button @click="paginaPanicos++" :disabled="paginaPanicos === totalPaginasPanicos" class="page-btn">›</button>
+        </div>
       </div>
+
+      <!-- Tabla Todos (combinada) -->
+<div v-if="tab === 'todos'" class="table-container">
+  <div class="table-header">
+    <h3>Todos los Registros</h3>
+    <span class="table-count">{{ todosCombinados.length }} registros</span>
+  </div>
+  <div v-if="todosCombinados.length === 0" class="empty-state">
+    <p>Sin registros</p>
+  </div>
+  <table v-else class="events-table">
+    <thead>
+      <tr><th>ID</th><th>Tipo</th><th>Detalle</th><th>Estado</th><th>Fecha</th></tr>
+    </thead>
+    <tbody>
+      <tr v-for="item in todosPaginados" :key="item._tabla + item.id"
+          :class="item._tabla === 'panico' ? 'row-panic' : item.alert ? 'row-alert' : ''">
+        <td class="cell-id">#{{ item.id }}</td>
+        <td>
+          <span v-if="item._tabla === 'sensor'" :class="['type-badge', getTypeClass(item.type)]">{{ item.type }}</span>
+          <span v-else class="type-badge fire">🆘 Pánico</span>
+        </td>
+        <td class="cell-value">
+          <span v-if="item._tabla === 'sensor'">{{ item.value }}</span>
+          <span v-else>Botón de emergencia</span>
+        </td>
+        <td>
+          <span v-if="item._tabla === 'sensor'" :class="['status-badge', item.alert ? 'alert' : 'normal']">
+            {{ item.alert ? '🔥 Alerta' : '✓ Normal' }}
+          </span>
+          <span v-else :class="['status-badge', item.atendido ? 'normal' : 'alert']">
+            {{ item.atendido ? '✓ Cerrada' : '🆘 Activa' }}
+          </span>
+        </td>
+      <td class="cell-date">{{ formatDate(item.timestamp) }}</td>
+      </tr>
+    </tbody>
+  </table>
+  <div v-if="totalPaginasTodos > 1" class="pagination">
+    <button @click="paginaTodos--" :disabled="paginaTodos === 1" class="page-btn">‹</button>
+    <span class="page-info">{{ paginaTodos }} / {{ totalPaginasTodos }}</span>
+    <button @click="paginaTodos++" :disabled="paginaTodos === totalPaginasTodos" class="page-btn">›</button>
+  </div>
+</div>
 
       <!-- Botón refrescar -->
       <div class="refresh-section">
@@ -196,7 +215,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
 
@@ -208,10 +227,49 @@ const tab = ref('sensores')
 const sensores = ref([])
 const panicos = ref([])
 
+// ============= Paginación================
+const paginaSensores = ref(1) // Página actual tab sensores
+const paginaPanicos = ref(1) // Página actual even pánico
+const paginaTodos    = ref(1)
+const porPagina = 10 // Registros por pág. 10
+
+// Paginación de sensores
+const sensoresPaginados = computed(() => {
+  const inicio = (paginaSensores.value - 1) * porPagina
+  return sensores.value.slice(inicio, inicio + porPagina)
+})
+// Paginación eventos de pánico
+const panicosPaginados = computed(() => {
+  const inicio = (paginaPanicos.value - 1) * porPagina
+  return panicos.value.slice(inicio, inicio + porPagina)
+})
+
+const todosCombinados = computed(() => {
+  const sens = sensores.value.map(s => ({ ...s, _tabla: 'sensor' }))
+  const pan  = panicos.value.map(p => ({ ...p, _tabla: 'panico' }))
+  return [...sens, ...pan].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+})
+
+const todosPaginados = computed(() => {
+  const inicio = (paginaTodos.value - 1) * porPagina
+  return todosCombinados.value.slice(inicio, inicio + porPagina)
+})
+
+const totalPaginasSensores = computed(() => Math.ceil(sensores.value.length / porPagina))
+const totalPaginasPanicos  = computed(() => Math.ceil(panicos.value.length / porPagina))
+const totalPaginasTodos    = computed(() => Math.ceil(todosCombinados.value.length / porPagina))
+
+watch(tab, () => {
+  paginaSensores.value = 1
+  paginaPanicos.value  = 1
+  paginaTodos.value    = 1
+})
+
+//==============Filtros=========
 const eventosFiltrados = computed(() => {
   if (tab.value === 'sensores') return sensores.value
   if (tab.value === 'panico') return panicos.value
-  return [...sensores.value, ...panicos.value]
+  return todosCombinados.value
 })
 
 const getTypeClass = (type) => {
@@ -590,6 +648,46 @@ onMounted(fetchData)
   color: #F8FAFC;
   border-color: #323B4E;
   background: #1E2435;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #262D3D;
+}
+
+.page-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #111827;
+  border: 1px solid #262D3D;
+  color: #94A3B8;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: #F97316;
+  border-color: #F97316;
+  color: white;
+}
+
+.page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.page-info {
+  font-size: 13px;
+  color: #475569;
+  min-width: 60px;
+  text-align: center;
 }
 
 /* Responsive */
