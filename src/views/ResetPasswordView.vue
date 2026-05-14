@@ -1,290 +1,291 @@
 <template>
   <div class="reset-container">
     <div class="reset-card">
-      <!-- Logo KitchenGuard -->
-      <div class="logo-section">
-        <svg width="180" height="50" viewBox="0 0 240 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="resetLogoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#F97316"/>
-              <stop offset="100%" stop-color="#EA580C"/>
-            </linearGradient>
-          </defs>
-          <circle cx="30" cy="30" r="23" fill="#1A1F2E" stroke="#323B4E" stroke-width="1"/>
-          <circle cx="30" cy="30" r="20" fill="none" stroke="url(#resetLogoGrad)" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.6"/>
-          <path d="M30 14 C38 14 46 22 46 32 C46 42 38 48 30 49 C22 48 14 42 14 32 C14 22 22 14 30 14Z" fill="url(#resetLogoGrad)"/>
-          <ellipse cx="24" cy="20" rx="3" ry="5" fill="rgba(255,255,255,0.15)" transform="rotate(-20, 24, 20)"/>
-          <path d="M30 15 C33 8 38 5 42 8 C38 10 34 12 30 15Z" fill="#166534"/>
-          <text x="68" y="28" fill="#F8FAFC" font-weight="700" font-size="18" letter-spacing="1">KITCHEN</text>
-          <text x="68" y="46" fill="#F97316" font-weight="800" font-size="14" letter-spacing="3.5">GUARD</text>
-        </svg>
-        <p class="reset-subtitle">Restablecer contraseña</p>
+      <div class="logo">
+        <h2>🔐 KitchenGuard</h2>
+        <p>Restablecer contraseña</p>
       </div>
 
-      <!-- Icono de candado -->
-      <div class="reset-icon">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="1.5">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-          <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
-        </svg>
+      <div v-if="!showResetForm && !success">
+        <form @submit.prevent="sendResetEmail" class="reset-form">
+          <div class="form-group">
+            <label>Correo electrónico</label>
+            <input type="email" v-model="email" required placeholder="tu@email.com" class="reset-input" />
+          </div>
+          <button type="submit" :disabled="loading" class="reset-btn">
+            {{ loading ? 'Enviando...' : 'Enviar enlace de recuperación' }}
+          </button>
+        </form>
+        <p class="back-login">
+          <router-link to="/login">← Volver al inicio de sesión</router-link>
+        </p>
       </div>
 
-      <form @submit.prevent="updatePassword" class="reset-form">
-        <div class="form-group">
-          <label>Nueva contraseña</label>
-          <div class="input-wrapper">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" class="input-icon">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-            </svg>
-            <input v-model="password" type="password" placeholder="Mínimo 6 caracteres" required />
+      <div v-else-if="showResetForm && !success">
+        <form @submit.prevent="handleUpdatePassword" class="reset-form">
+          <div class="form-group">
+            <label>Nueva contraseña</label>
+            <input type="password" v-model="newPassword" required minlength="6" placeholder="Mínimo 6 caracteres" class="reset-input" />
           </div>
-        </div>
-        
-        <div class="form-group">
-          <label>Confirmar contraseña</label>
-          <div class="input-wrapper">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" class="input-icon">
-              <path d="M9 12l2 2 4-4"/>
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-            </svg>
-            <input v-model="confirmPassword" type="password" placeholder="Repite tu contraseña" required />
+          <div class="form-group">
+            <label>Confirmar contraseña</label>
+            <input type="password" v-model="confirmPassword" required placeholder="Repite la contraseña" class="reset-input" />
           </div>
-        </div>
+          <div v-if="passwordsError" class="field-error">{{ passwordsError }}</div>
+          <button type="submit" :disabled="loading || !passwordsMatch" class="reset-btn">
+            {{ loading ? 'Actualizando...' : 'Actualizar contraseña' }}
+          </button>
+        </form>
+      </div>
 
-        <p v-if="error" class="error">{{ error }}</p>
-        <p v-if="message" class="success">{{ message }}</p>
+      <div v-else-if="success" class="success-message">
+        <div class="success-icon">✓</div>
+        <h3>¡Contraseña actualizada!</h3>
+        <p>Ya puedes iniciar sesión con tu nueva contraseña.</p>
+        <router-link to="/login" class="login-link">Ir al inicio de sesión</router-link>
+      </div>
 
-        <button type="submit" :disabled="loading" class="submit-btn">
-          <span v-if="loading" class="spinner"></span>
-          {{ loading ? 'Guardando...' : 'Cambiar contraseña' }}
-        </button>
-
-        <p class="link" @click="router.push('/login')">← Volver al login</p>
-      </form>
+      <div v-if="errorMessage" class="error-message">
+        <p>{{ errorMessage }}</p>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { supabase } from '../lib/supabaseClient'  // ✅ Ruta correcta
+import { supabase } from '../lib/supabaseClient'
+import { useAuth } from '../composables/useAuth'
 
 const router = useRouter()
-const password = ref('')
+const { updatePassword } = useAuth()
+
+const email = ref('')
+const newPassword = ref('')
 const confirmPassword = ref('')
-const error = ref('')
-const message = ref('')
 const loading = ref(false)
+const errorMessage = ref('')
+const passwordsError = ref('')
+const success = ref(false)
+const showResetForm = ref(false)
+
+const passwordsMatch = computed(() => {
+  return newPassword.value && confirmPassword.value && newPassword.value === confirmPassword.value
+})
 
 onMounted(async () => {
-  const hashParams = new URLSearchParams(window.location.hash.substring(1))
-  const accessToken = hashParams.get('access_token')
-  const refreshToken = hashParams.get('refresh_token')
-
-  if (!accessToken || !refreshToken) {
-    error.value = 'Enlace inválido o expirado'
-    return
-  }
-
-  const { error: sessionError } = await supabase.auth.setSession({
-    access_token: accessToken,
-    refresh_token: refreshToken
+  // 1. Escuchar el evento PASSWORD_RECOVERY global de Supabase
+  // Esto es lo más fiable cuando se usa el enlace del correo
+  supabase.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'PASSWORD_RECOVERY') {
+      showResetForm.value = true
+    }
   })
 
-  if (sessionError) {
-    error.value = sessionError.message
+  // 2. Respaldo manual: Revisar si el token está en la URL en este momento
+  const hash = window.location.hash
+  if (hash && hash.includes('access_token')) {
+    showResetForm.value = true
   }
 })
 
-const updatePassword = async () => {
-  // ... validaciones ...
-  
-  const { error: updateError } = await supabase.auth.updateUser({
-    password: password.value
-  })
+const sendResetEmail = async () => {
+  loading.value = true
+  errorMessage.value = ''
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email.value, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    })
+    if (error) throw error
+    alert('Correo enviado. Revisa tu bandeja de entrada.')
+  } catch (error) {
+    errorMessage.value = error.message
+  } finally {
+    loading.value = false
+  }
+}
 
-  if (updateError) {
-    error.value = updateError.message
+const handleUpdatePassword = async () => {
+  if (!passwordsMatch.value) {
+    passwordsError.value = 'Las contraseñas no coinciden'
     return
   }
 
-  message.value = 'Contraseña actualizada correctamente'
+  loading.value = true
+  errorMessage.value = ''
 
-  // ✅ Cerrar sesión antes de redirigir
-  await supabase.auth.signOut()
-
-  setTimeout(() => {
-    router.push('/login')
-  }, 2000)
+  try {
+    // Usamos la función del composable que ya tiene la lógica de Supabase
+    await updatePassword(newPassword.value)
+    
+    success.value = true
+    
+    // Limpieza
+    localStorage.removeItem('auth_token')
+    
+    setTimeout(() => {
+      router.push('/login')
+    }, 3000)
+  } catch (error) {
+    errorMessage.value = "Error: " + error.message
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 
 <style scoped>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
 .reset-container {
   min-height: 100vh;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #0A0D14 0%, #111827 100%);
   padding: 20px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .reset-card {
-  background: #1A1F2E;
-  border: 1px solid #262D3D;
+  background: rgba(26, 26, 26, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 24px;
   padding: 40px;
+  max-width: 450px;
   width: 100%;
-  max-width: 440px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
 }
 
-.logo-section {
+.logo {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 32px;
 }
 
-.reset-subtitle {
-  color: #94A3B8;
+.logo h2 {
+  color: #F97316;
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.logo p {
+  color: #999;
   font-size: 14px;
-  margin-top: 12px;
-}
-
-.reset-icon {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 24px;
 }
 
 .reset-form {
-  animation: fadeSlideIn 0.3s ease;
-}
-
-@keyframes fadeSlideIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .form-group {
-  margin-bottom: 18px;
-}
-
-.form-group label {
-  display: block;
-  color: #94A3B8;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  margin-bottom: 6px;
-}
-
-.input-wrapper {
-  position: relative;
   display: flex;
-  align-items: center;
-}
-
-.input-icon {
-  position: absolute;
-  left: 14px;
-  z-index: 1;
-}
-
-input {
-  width: 100%;
-  background: #0A0D14;
-  border: 1px solid #262D3D;
-  border-radius: 12px;
-  padding: 12px 14px 12px 40px;
-  color: #F8FAFC;
-  font-size: 14px;
-  transition: all 0.2s ease;
-  outline: none;
-}
-
-input:focus {
-  border-color: #F97316;
-  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
-}
-
-input::placeholder { color: #475569; }
-
-.submit-btn {
-  width: 100%;
-  background: linear-gradient(135deg, #F97316, #EA580C);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  padding: 14px;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-top: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
   gap: 8px;
 }
 
-.submit-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #EA580C, #C2410C);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(249, 115, 22, 0.3);
-}
-
-.submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
-.spinner {
-  width: 18px; height: 18px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.error {
-  background: rgba(239,68,68,0.1);
-  border: 1px solid rgba(239,68,68,0.3);
-  color: #EF4444;
+.form-group label {
+  color: #ccc;
   font-size: 13px;
-  text-align: center;
-  padding: 10px;
-  border-radius: 10px;
-  margin-bottom: 12px;
+  font-weight: 500;
 }
 
-.success {
-  background: rgba(16,185,129,0.1);
-  border: 1px solid rgba(16,185,129,0.3);
-  color: #10B981;
-  font-size: 13px;
-  text-align: center;
-  padding: 10px;
-  border-radius: 10px;
-  margin-bottom: 12px;
+.reset-input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 14px 16px;
+  color: white;
+  font-size: 14px;
 }
 
-.link {
-  text-align: center;
-  color: #475569;
-  font-size: 13px;
-  margin-top: 16px;
+.reset-input:focus {
+  outline: none;
+  border-color: #F97316;
+}
+
+.reset-btn {
+  background: linear-gradient(135deg, #F97316, #EA580C);
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
-  transition: color 0.2s;
 }
 
-.link:hover { color: #F97316; }
+.reset-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
 
-@media (max-width: 480px) {
-  .reset-card { padding: 28px 20px; }
+.reset-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.back-login {
+  text-align: center;
+  margin-top: 24px;
+}
+
+.back-login a, .login-link {
+  color: #F97316;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.success-message {
+  text-align: center;
+}
+
+.success-icon {
+  width: 60px;
+  height: 60px;
+  background: rgba(48, 209, 88, 0.2);
+  border: 2px solid #30D158;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 32px;
+  color: #30D158;
+}
+
+.success-message h3 {
+  color: white;
+  margin-bottom: 12px;
+}
+
+.success-message p {
+  color: #999;
+  margin-bottom: 24px;
+}
+
+.login-link {
+  display: inline-block;
+  background: rgba(249, 115, 22, 0.15);
+  padding: 12px 24px;
+  border-radius: 12px;
+}
+
+.error-message {
+  background: rgba(255, 59, 48, 0.15);
+  border: 1px solid #FF3B30;
+  border-radius: 12px;
+  padding: 12px;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.error-message p {
+  color: #FF3B30;
+  font-size: 13px;
+  margin: 0;
+}
+
+.field-error {
+  color: #FF3B30;
+  font-size: 12px;
+  margin-top: -8px;
 }
 </style>

@@ -168,19 +168,20 @@ import { supabase } from '../lib/supabaseClient'
 
 const router = useRouter()
 
-const modo            = ref('login')
-const email           = ref('')
-const password        = ref('')
+const modo = ref('login')
+const email = ref('')
+const password = ref('')
 const passwordConfirm = ref('')
-const error           = ref('')
-const mensaje         = ref('')
-const loading         = ref(false)
+const error = ref('')
+const mensaje = ref('')
+const loading = ref(false)
 
 const limpiar = () => {
-  error.value   = ''
+  error.value = ''
   mensaje.value = ''
 }
 
+// ✅ LOGIN - CORREGIDO
 const handleLogin = async () => {
   limpiar()
   loading.value = true
@@ -191,9 +192,11 @@ const handleLogin = async () => {
     })
     if (err) throw err
     
-    // Guardar token en localStorage
     localStorage.setItem('auth_token', 'true')
-    router.push('/dashboard')
+    
+    // ✅ USAR window.location.href para limpiar historial
+    window.location.href = '/dashboard'
+    
   } catch (e) {
     error.value = 'Correo o contraseña incorrectos'
   } finally {
@@ -201,6 +204,7 @@ const handleLogin = async () => {
   }
 }
 
+// ✅ REGISTRO - CORREGIDO
 const handleRegistro = async () => {
   limpiar()
   if (password.value !== passwordConfirm.value) {
@@ -214,12 +218,20 @@ const handleRegistro = async () => {
   loading.value = true
   try {
     const { error: err } = await supabase.auth.signUp({
-      email: email.value,
-      password: password.value
-    })
+    email: email.value,
+    password: password.value,
+    options: {
+    emailRedirectTo: `${window.location.origin}/dashboard` // o elimina esta línea
+  }
+})
     if (err) throw err
     mensaje.value = '¡Cuenta creada! Revisa tu correo para confirmar tu cuenta.'
-    email.value = ''; password.value = ''; passwordConfirm.value = ''
+    email.value = ''
+    password.value = ''
+    passwordConfirm.value = ''
+    setTimeout(() => {
+      modo.value = 'login'
+    }, 3000)
   } catch (e) {
     error.value = e.message || 'Error al registrarse'
   } finally {
@@ -227,37 +239,39 @@ const handleRegistro = async () => {
   }
 }
 
+// ✅ RECUPERACIÓN - CORREGIDO
 const handleRecovery = async () => {
   limpiar()
+  if (!email.value) {
+    error.value = 'Ingresa tu correo electrónico'
+    return
+  }
+  
   loading.value = true
 
   try {
-    const { error: err } =
-      await supabase.auth.resetPasswordForEmail(
-        email.value,
-        {
-          redirectTo:
-            `${window.location.origin}/reset-password`
-        }
-      )
+    const { error: err } = await supabase.auth.resetPasswordForEmail(
+      email.value,
+      {
+        redirectTo: `${window.location.origin}/reset-password`
+      }
+    )
 
     if (err) throw err
 
-    mensaje.value =
-      '¡Enlace enviado! Revisa tu correo electrónico.'
-
+    mensaje.value = '¡Enlace enviado! Revisa tu correo electrónico.'
     email.value = ''
 
   } catch (e) {
     console.error(e)
-
-    error.value =
-      e.message || 'Error al enviar el enlace'
+    error.value = e.message || 'Error al enviar el enlace'
   } finally {
     loading.value = false
   }
 }
 </script>
+
+
 
 <style scoped>
 /* ─── DISEÑO PROFESIONAL KITCHENGUARD ─── */
