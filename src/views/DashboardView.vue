@@ -632,7 +632,6 @@ const generarAlertas = () => {
   if (status.value.temperature < 40) {
     alertasActivas.value = alertasActivas.value.filter(a => a.tipo !== 'temperatura')
   }
-<<<<<<< HEAD
 
   if (panicActivo.value && !yaHayPanico) {
   alertasActivas.value.unshift({
@@ -645,9 +644,6 @@ const generarAlertas = () => {
   })
 }
   // Mantener máximo 3 alertas
-=======
-  
->>>>>>> 177845d047689528b082d3f8320a564b9b4e3105
   if (alertasActivas.value.length > 3) {
     alertasActivas.value = alertasActivas.value.slice(0, 3)
   }
