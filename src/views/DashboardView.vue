@@ -360,6 +360,7 @@ const { logout } = useAuth()
 
 const API_BASE = import.meta.env.VITE_API_BASE
 const connected = ref(false)
+const panicActivo = ref(false)
 const status = ref({ stove_on: false, gas_level: 0, temperature: 22, humidity: 55, panic: false })
 
 // Variables para gráficos y timers
@@ -412,6 +413,7 @@ const ENSENADA_MONTHLY_TEMP = {
   7: 22, 8: 23, 9: 22, 10: 19, 11: 16, 12: 13
 }
 const getEnsenadaReferenceTemp = () => ENSENADA_MONTHLY_TEMP[new Date().getMonth() + 1] || 18
+
 const getHourAdjustment = () => {
   const hour = new Date().getHours()
   if (hour >= 3 && hour <= 7) return -3
@@ -494,6 +496,7 @@ const generarAlertas = () => {
   // ✅ Verificar si ya existe una alerta activa del mismo tipo
   const yaHayAlertaGas = alertasActivas.value.some(a => a.tipo === 'gas')
   const yaHayAlertaTemp = alertasActivas.value.some(a => a.tipo === 'temperatura')
+  const yaHayPanico = alertasActivas.value.some(a => a.titulo === '🆘 BOTON DE PANICO')
   
   // Solo crear alerta de gas si NO hay una activa
   if (status.value.gas_level >= 70 && !yaHayAlertaGas) {
@@ -528,7 +531,17 @@ const generarAlertas = () => {
   if (status.value.temperature < 40) {
     alertasActivas.value = alertasActivas.value.filter(a => a.tipo !== 'temperatura')
   }
-  
+
+  if (panicActivo.value && !yaHayPanico) {
+  alertasActivas.value.unshift({
+    id: ++alertaCounter.value,
+    tipo: 'estufa',
+    titulo: '🆘 BOTON DE PANICO',
+    mensaje: 'Emergencia enviada desde KitchenGuard',
+    nivel: 10,
+    timestamp: ahora
+  })
+}
   // Mantener máximo 3 alertas
   if (alertasActivas.value.length > 3) {
     alertasActivas.value = alertasActivas.value.slice(0, 3)
@@ -605,6 +618,27 @@ const fetchStatus = async () => {
   }
 }
 
+// - Boton Panico
+
+const fetchPanic = async () => {
+  try {
+    const res = await fetch(`${API_BASE}/api/panic`)
+    const data = await res.json()
+
+    if (data.length > 0) {
+      const ultimo = data[0]
+
+      const tiempoEvento = new Date(ultimo.timestamp).getTime()
+      const ahora = Date.now()
+
+      panicActivo.value = (ahora - tiempoEvento) < 10000
+    }
+
+  } catch (err) {
+    console.error("Error panic:", err)
+  }
+}
+
 const descartarAlerta = async (alertaId) => {
   alertasActivas.value = alertasActivas.value.filter(a => a.id !== alertaId)
   if (status.value.stove_on) {
@@ -631,6 +665,8 @@ onMounted(() => {
   setTimeout(() => inicializarGraficoGas(), 100)
   eventos.value = eventosEjemplo
   eventInterval = setInterval(simularDatosEventos, 8000)
+  fetchPanic()
+  setInterval(fetchPanic, 3000)
 })
 
 onUnmounted(() => {
