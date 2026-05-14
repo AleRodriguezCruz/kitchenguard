@@ -52,19 +52,7 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  const { data: { session } } = await supabase.auth.getSession()
-  const isAuthenticated = !!session
-  
-  // Detectar token en hash o query
-  const hasHashToken = window.location.hash.includes('access_token')
-  const isResetWithToken = to.path === '/reset-password' && (hasHashToken || to.query.token)
-  
-  // Siempre permitir reset-password si tiene token
-  if (isResetWithToken) {
-    return next()
-  }
-  
-  // Permitir reset-password incluso sin token (solicitud de email)
+  // Permitir SIEMPRE el acceso a reset-password si viene un token en la URL
   if (to.path === '/reset-password') {
     return next()
   }
