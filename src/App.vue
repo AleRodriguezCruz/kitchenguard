@@ -1,16 +1,18 @@
-// src/App.vue
+<template>
+  <router-view />
+</template>
+
 <script setup>
 import { onMounted } from 'vue'
-import { useRouter } from 'vue-router' // Importar router
 import { supabase } from './lib/supabaseClient'
 
-const router = useRouter()
-
 onMounted(() => {
+  // Solo escuchar eventos de autenticación sin redirigir automáticamente
   supabase.auth.onAuthStateChange((event, session) => {
+    // Si es recuperación, no hacemos nada aquí; el router y ResetPasswordView lo manejan
     if (event === 'PASSWORD_RECOVERY') {
-      // Forzamos la redirección a la vista de reset
-      router.push('/reset-password')
+      // No redirigir, solo dejar que el router procese la ruta
+      return
     }
   })
 })
