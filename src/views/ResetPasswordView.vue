@@ -7,15 +7,15 @@
         <p>Restablecer contraseña</p>
       </div>
 
-      <!-- Estado 1: Solicitando reset -->
+      <!-- Estado 1: Solicitando reset (sin token) -->
       <div v-if="!showResetForm && !success">
         <form @submit.prevent="sendResetEmail" class="reset-form">
           <div class="form-group">
             <label>Correo electrónico</label>
-            <input 
-              type="email" 
-              v-model="email" 
-              required 
+            <input
+              type="email"
+              v-model="email"
+              required
               placeholder="tu@email.com"
               class="reset-input"
             />
@@ -29,15 +29,15 @@
         </p>
       </div>
 
-      <!-- Estado 2: Formulario para nueva contraseña -->
+      <!-- Estado 2: Formulario para nueva contraseña (con token válido) -->
       <div v-else-if="showResetForm && !success">
         <form @submit.prevent="updatePassword" class="reset-form">
           <div class="form-group">
             <label>Nueva contraseña</label>
-            <input 
-              type="password" 
-              v-model="newPassword" 
-              required 
+            <input
+              type="password"
+              v-model="newPassword"
+              required
               minlength="6"
               placeholder="Mínimo 6 caracteres"
               class="reset-input"
@@ -45,14 +45,15 @@
           </div>
           <div class="form-group">
             <label>Confirmar contraseña</label>
-            <input 
-              type="password" 
-              v-model="confirmPassword" 
-              required 
+            <input
+              type="password"
+              v-model="confirmPassword"
+              required
               placeholder="Repite la contraseña"
               class="reset-input"
             />
           </div>
+          <div v-if="passwordsError" class="field-error">{{ passwordsError }}</div>
           <button type="submit" :disabled="loading || !passwordsMatch" class="reset-btn">
             {{ loading ? 'Actualizando...' : 'Actualizar contraseña' }}
           </button>
@@ -67,7 +68,7 @@
         <router-link to="/login" class="login-link">Ir al inicio de sesión</router-link>
       </div>
 
-      <!-- Mensajes de error -->
+      <!-- Mensajes de error generales -->
       <div v-if="errorMessage" class="error-message">
         <p>{{ errorMessage }}</p>
       </div>
@@ -76,56 +77,77 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { supabase } from '../lib/supabaseClient'
 
 const router = useRouter()
 const route = useRoute()
+
+// Estado reactivo
 const email = ref('')
 const newPassword = ref('')
 const confirmPassword = ref('')
 const loading = ref(false)
 const errorMessage = ref('')
+const passwordsError = ref('')
 const success = ref(false)
 const showResetForm = ref(false)
 
-// Verificar si hay token en la URL (modo reset)
-const hasToken = computed(() => !!route.query.token)
-
-// Validar que las contraseñas coincidan
+// Validación de coincidencia de contraseñas
 const passwordsMatch = computed(() => {
-  if (!newPassword.value || !confirmPassword.value) return false
-  return newPassword.value === confirmPassword.value
+  return newPassword.value && confirmPassword.value && newPassword.value === confirmPassword.value
 })
 
-// Al montar, verificar si estamos en modo reset por token
-if (hasToken.value) {
-  showResetForm.value = true
-}
+// Detectar token en la URL al montar el componente
+onMounted(async () => {
+  // Esperar un breve instante para que Supabase procese el hash si ya está en la URL
+  await new Promise(resolve => setTimeout(resolve, 100))
 
-// Enviar email de recuperación
+  // 1. Revisar parámetros de consulta (query)
+  const queryToken = route.query.token
+  // 2. Revisar el hash de la URL (formato que usa Supabase: #access_token=...)
+  const hashParams = new URLSearchParams(window.location.hash.substring(1))
+  const hashAccessToken = hashParams.get('access_token')
+  const hashRefreshToken = hashParams.get('refresh_token')
+
+  // Si hay token en query o en hash, activamos el modo formulario de nueva contraseña
+  if (queryToken || hashAccessToken) {
+    console.log('🔐 Token de recuperación detectado')
+    showResetForm.value = true
+
+    // Si el token está en el hash, establecemos la sesión manualmente
+    if (hashAccessToken) {
+      const { error } = await supabase.auth.setSession({
+        access_token: hashAccessToken,
+        refresh_token: hashRefreshToken || ''
+      })
+      if (error) {
+        console.error('Error al establecer sesión:', error)
+        errorMessage.value = 'El enlace de recuperación no es válido o ha expirado.'
+        showResetForm.value = false
+      }
+    }
+  }
+})
+
+// Enviar correo de recuperación (primer paso)
 const sendResetEmail = async () => {
   if (!email.value) {
     errorMessage.value = 'Ingresa un correo electrónico'
     return
   }
-
   loading.value = true
   errorMessage.value = ''
 
   try {
-    // IMPORTANTE: La URL debe ser la de PRODUCCIÓN, no localhost
     const redirectUrl = `${window.location.origin}/reset-password`
-    
     const { error } = await supabase.auth.resetPasswordForEmail(email.value, {
-      redirectTo: redirectUrl
+      redirectTo: redirectUrl,
     })
-
     if (error) throw error
 
     success.value = true
-    errorMessage.value = ''
   } catch (error) {
     console.error('Error sending reset email:', error)
     errorMessage.value = error.message || 'Error al enviar el correo. Intenta de nuevo.'
@@ -134,15 +156,16 @@ const sendResetEmail = async () => {
   }
 }
 
-// Actualizar contraseña con el token
+// Actualizar contraseña (segundo paso, con token válido)
 const updatePassword = async () => {
+  // Validaciones locales
+  passwordsError.value = ''
   if (!passwordsMatch.value) {
-    errorMessage.value = 'Las contraseñas no coinciden'
+    passwordsError.value = 'Las contraseñas no coinciden'
     return
   }
-
   if (newPassword.value.length < 6) {
-    errorMessage.value = 'La contraseña debe tener al menos 6 caracteres'
+    passwordsError.value = 'La contraseña debe tener al menos 6 caracteres'
     return
   }
 
@@ -150,44 +173,43 @@ const updatePassword = async () => {
   errorMessage.value = ''
 
   try {
-    // Obtener la sesión actual (que viene del token en la URL)
+    // Obtener la sesión actual (ya debería estar establecida por el token)
     const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-    
     if (sessionError) throw sessionError
-    
+
     if (!session) {
-      // Intentar con el token de la URL
+      // Si no hay sesión, intentar recuperar el token del hash nuevamente
       const hashParams = new URLSearchParams(window.location.hash.substring(1))
       const accessToken = hashParams.get('access_token')
-      
+      const refreshToken = hashParams.get('refresh_token')
       if (accessToken) {
-        const { error: setSessionError } = await supabase.auth.setSession({
+        const { error: setError } = await supabase.auth.setSession({
           access_token: accessToken,
-          refresh_token: hashParams.get('refresh_token') || ''
+          refresh_token: refreshToken || ''
         })
-        if (setSessionError) throw setSessionError
+        if (setError) throw setError
       } else {
-        throw new Error('No se encontró token de recuperación')
+        throw new Error('No se encontró una sesión activa. El enlace podría haber expirado.')
       }
     }
 
-    // Actualizar la contraseña
+    // Actualizar la contraseña del usuario autenticado
     const { error } = await supabase.auth.updateUser({
       password: newPassword.value
     })
-
     if (error) throw error
 
     success.value = true
-    
-    // IMPORTANTE: Cerrar sesión después de cambiar contraseña
+
+    // Cerrar sesión para que el usuario deba iniciar sesión con la nueva contraseña
     await supabase.auth.signOut()
-    
-    // Redirigir al login después de 3 segundos
+    localStorage.removeItem('auth_token')
+
+    // Redirigir al login después de 2 segundos
     setTimeout(() => {
-      router.push('/login')
-    }, 3000)
-    
+      router.replace('/login')
+    }, 2000)
+
   } catch (error) {
     console.error('Error updating password:', error)
     errorMessage.value = error.message || 'Error al actualizar la contraseña. El enlace podría haber expirado.'
@@ -295,14 +317,16 @@ const updatePassword = async () => {
   margin-top: 24px;
 }
 
-.back-login a, .login-link {
+.back-login a,
+.login-link {
   color: #F97316;
   text-decoration: none;
   font-size: 13px;
   transition: color 0.3s;
 }
 
-.back-login a:hover, .login-link:hover {
+.back-login a:hover,
+.login-link:hover {
   color: #EA580C;
   text-decoration: underline;
 }
@@ -356,5 +380,11 @@ const updatePassword = async () => {
   color: #FF3B30;
   font-size: 13px;
   margin: 0;
+}
+
+.field-error {
+  color: #FF3B30;
+  font-size: 12px;
+  margin-top: -6px;
 }
 </style>
