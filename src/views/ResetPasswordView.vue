@@ -51,6 +51,7 @@
     </div>
   </div>
 </template>
+
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -74,12 +75,15 @@ const passwordsMatch = computed(() => {
 })
 
 onMounted(async () => {
+  // 1. Escuchar el evento PASSWORD_RECOVERY global de Supabase
+  // Esto es lo más fiable cuando se usa el enlace del correo
   supabase.auth.onAuthStateChange(async (event, session) => {
     if (event === 'PASSWORD_RECOVERY') {
       showResetForm.value = true
     }
   })
 
+  // 2. Respaldo manual: Revisar si el token está en la URL en este momento
   const hash = window.location.hash
   if (hash && hash.includes('access_token')) {
     showResetForm.value = true
@@ -112,19 +116,17 @@ const handleUpdatePassword = async () => {
   errorMessage.value = ''
 
   try {
+    // Usamos la función del composable que ya tiene la lógica de Supabase
     await updatePassword(newPassword.value)
     
     success.value = true
     
-    // ✅ PASO 1: Asegurarnos de que no hay un token viejo que confunda al router
+    // Limpieza
     localStorage.removeItem('auth_token')
     
-    // ✅ PASO 2: Usar replace en lugar de push para borrar el rastro del historial
     setTimeout(() => {
-      // replace borra la ruta de "reset-password" del historial
-      router.replace('/login')
+      router.push('/login')
     }, 3000)
-    
   } catch (error) {
     errorMessage.value = "Error: " + error.message
   } finally {
