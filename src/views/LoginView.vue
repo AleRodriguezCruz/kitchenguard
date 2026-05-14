@@ -215,23 +215,30 @@ const handleRegistro = async () => {
     error.value = 'La contraseña debe tener al menos 6 caracteres'
     return
   }
+
   loading.value = true
   try {
-    const { error: err } = await supabase.auth.signUp({
-    email: email.value,
-    password: password.value,
-    options: {
-    emailRedirectTo: `${window.location.origin}/dashboard` // o elimina esta línea
-  }
-})
+    const { data, error: err } = await supabase.auth.signUp({
+      email: email.value,
+      password: password.value,
+      options: {
+        emailRedirectTo: `${window.location.origin}/login`
+      }
+    })
     if (err) throw err
-    mensaje.value = '¡Cuenta creada! Revisa tu correo para confirmar tu cuenta.'
+
+    // Supabase regresa identities vacío si el correo ya existe
+    if (data.user && data.user.identities?.length === 0) {
+      error.value = 'Este correo ya está registrado. Inicia sesión.'
+      return
+    }
+
+    mensaje.value = '¡Cuenta creada! Revisa tu correo para confirmar tu cuenta antes de iniciar sesión.'
     email.value = ''
     password.value = ''
     passwordConfirm.value = ''
-    setTimeout(() => {
-      modo.value = 'login'
-    }, 3000)
+    setTimeout(() => { modo.value = 'login' }, 3000)
+
   } catch (e) {
     error.value = e.message || 'Error al registrarse'
   } finally {
