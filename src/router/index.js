@@ -52,22 +52,32 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  // Reset-password siempre permitido
-  if (to.path === '/reset-password') return next()
-
-  // Login siempre permitido
-  if (to.path === '/login') {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (session) return next('/dashboard')
+  const { data: { session } } = await supabase.auth.getSession()
+  const isAuthenticated = !!session
+  
+  // Detectar token en hash o query
+  const hasHashToken = window.location.hash.includes('access_token')
+  const isResetWithToken = to.path === '/reset-password' && (hasHashToken || to.query.token)
+  
+  // Siempre permitir reset-password si tiene token
+  if (isResetWithToken) {
     return next()
   }
-
-  // Rutas protegidas
-  if (to.meta.requiresAuth) {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) return next('/login')
+  
+  // Permitir reset-password incluso sin token (solicitud de email)
+  if (to.path === '/reset-password') {
+    return next()
   }
-
+  
+  // Resto de la lógica igual
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    return next('/login')
+  }
+  
+  if (to.path === '/login' && isAuthenticated) {
+    return next('/dashboard')
+  }
+  
   next()
 })
 
