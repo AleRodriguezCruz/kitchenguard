@@ -639,11 +639,19 @@ const generarAlertas = () => {
     id:        ++alertaCounter.value,
     tipo:      'estufa',
     titulo:    '🆘 BOTON DE PANICO',
-    mensaje:   'Emergencia enviada desde KitchenGuard',
+    mensaje:   `Emergencia enviada · ${panicEventoActivo.value.intentos} pulsación${panicEventoActivo.value.intentos > 1 ? 'es' : ''}`,
     nivel:     10,
     timestamp: new Date().toLocaleTimeString(),
     panicId:   panicEventoActivo.value.id   //guardamos el ID del evento
   })
+}
+
+  if (panicEventoActivo.value && yaHayPanico) {
+  alertasActivas.value = alertasActivas.value.map(a =>
+    a.titulo === '🆘 BOTON DE PANICO'
+      ? { ...a, mensaje: `Emergencia enviada · ${panicEventoActivo.value.intentos} pulsación${panicEventoActivo.value.intentos > 1 ? 'es' : ''}` }
+      : a
+  )
 }
   // Mantener máximo 3 alertas
   if (alertasActivas.value.length > 3) {
