@@ -186,19 +186,27 @@ const handleLogin = async () => {
   limpiar()
   loading.value = true
   try {
-    const { error: err } = await supabase.auth.signInWithPassword({
+    const { data, error: err } = await supabase.auth.signInWithPassword({
       email: email.value,
       password: password.value
     })
     if (err) throw err
-    
-    localStorage.setItem('auth_token', 'true')
-    
-    // ✅ USAR window.location.href para limpiar historial
-    window.location.href = '/dashboard'
-    
+
+    // Verificar si el correo está confirmado
+    if (!data.user.email_confirmed_at) {
+      error.value = 'Debes confirmar tu correo antes de iniciar sesión. Revisa tu bandeja de entrada.'
+      await supabase.auth.signOut()
+      return
+    }
+
+    router.push('/dashboard')
+
   } catch (e) {
-    error.value = 'Correo o contraseña incorrectos'
+    if (e.message?.includes('Email not confirmed')) {
+      error.value = 'Confirma tu correo antes de iniciar sesión.'
+    } else {
+      error.value = 'Correo o contraseña incorrectos'
+    }
   } finally {
     loading.value = false
   }
