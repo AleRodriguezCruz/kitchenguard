@@ -51,43 +51,23 @@ const router = createRouter({
   routes
 })
 
-// 🔒 GUARD DE NAVEGACIÓN - VERSIÓN CORREGIDA
 router.beforeEach(async (to, from, next) => {
-  // Obtener sesión actual
-  const { data: { session } } = await supabase.auth.getSession()
-  const isAuthenticated = !!session
-  
-  // 🔴 DETECTAR TOKEN DE RECUPERACIÓN EN LA URL
-  const hasResetToken = to.path === '/reset-password' && (
-    to.query.token || 
-    window.location.hash.includes('access_token')
-  )
-  
-  // Caso especial: reset-password con token válido
-  if (hasResetToken) {
-    console.log('🔐 Modo recuperación detectado - permitiendo acceso')
+  // Reset-password siempre permitido
+  if (to.path === '/reset-password') return next()
+
+  // Login siempre permitido
+  if (to.path === '/login') {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session) return next('/dashboard')
     return next()
   }
-  
-  // Caso especial: solo la ruta reset-password sin token
-  if (to.path === '/reset-password' && !hasResetToken) {
-    // Permitir acceso pero mostrar formulario de solicitud
-    return next()
+
+  // Rutas protegidas
+  if (to.meta.requiresAuth) {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return next('/login')
   }
-  
-  // 🔴 Ruta protegida sin autenticación → login
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    console.log('🔒 Ruta protegida sin sesión → login')
-    return next('/login')
-  }
-  
-  // 🟢 Usuario autenticado intenta ir a login → dashboard
-  if ((to.path === '/login') && isAuthenticated) {
-    console.log('⚠️ Usuario autenticado en login → dashboard')
-    return next('/dashboard')
-  }
-  
-  // ✅ Todo correcto
+
   next()
 })
 
