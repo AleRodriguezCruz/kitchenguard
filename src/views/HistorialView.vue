@@ -51,6 +51,11 @@
           </svg>
           <h2>Historial de Eventos</h2>
         </div>
+        <div class="modo-toggle">
+          <span class="modo-label">Modo historial:</span>
+          <button :class="['modo-btn', modoHistorial === 'todo' ? 'active' : '']" @click="cambiarModo('todo')">Todo</button>
+          <button :class="['modo-btn', modoHistorial === 'solo_alertas' ? 'active' : '']" @click="cambiarModo('solo_alertas')">Solo alertas</button>
+        </div>
         <div class="header-stats">
           <div class="header-stat">
             <span class="header-stat-value">{{ sensores.length }}</span>
@@ -224,8 +229,24 @@ const { logout } = useAuth()
 const API_BASE = import.meta.env.VITE_API_BASE
 
 const tab = ref('sensores')
+const modoHistorial = ref(localStorage.getItem('modoHistorial') || 'todo')
 const sensores = ref([])
 const panicos = ref([])
+
+//==========
+const cambiarModo = async (modo) => {
+  try {
+    await fetch(`${API_BASE}/api/config/modo`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ modo })
+    })
+    modoHistorial.value = modo
+    localStorage.setItem('modoHistorial', modo)
+  } catch {
+    console.error('Error al cambiar modo')
+  }
+}
 
 // ============= Paginación================
 const paginaSensores = ref(1) // Página actual tab sensores
@@ -324,7 +345,17 @@ const handleLogout = async () => {
   router.push('/login')
 }
 
-onMounted(fetchData)
+onMounted(async () => {
+  fetchData()
+  try {
+    const res = await fetch(`${API_BASE}/api/config/modo`)
+    const data = await res.json()
+    modoHistorial.value = data.modo
+    localStorage.setItem('modoHistorial', data.modo)
+  } catch {
+    //localStorage como fallback
+  }
+})
 </script>
 
 <style scoped>
@@ -693,7 +724,39 @@ onMounted(fetchData)
   min-width: 60px;
   text-align: center;
 }
+ /*Style para toggle */
+ .modo-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #111827;
+  border: 1px solid #262D3D;
+  border-radius: 12px;
+  padding: 6px 10px;
+}
 
+.modo-label {
+  font-size: 12px;
+  color: #475569;
+}
+
+.modo-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modo-btn.active {
+  background: #F97316;
+  color: white;
+  font-weight: 700;
+}
 /* Responsive */
 @media (max-width: 768px) {
   .main-content { padding: 16px; }
