@@ -52,7 +52,7 @@
           <h2>Historial de Eventos</h2>
         </div>
         <div class="modo-toggle">
-          <span class="modo-label">Modo historial:</span>
+          <span class="modo-label">💾 Guardar:</span>
           <button :class="['modo-btn', modoHistorial === 'todo' ? 'active' : '']" @click="cambiarModo('todo')">Todo</button>
           <button :class="['modo-btn', modoHistorial === 'solo_alertas' ? 'active' : '']" @click="cambiarModo('solo_alertas')">Solo alertas</button>
         </div>
