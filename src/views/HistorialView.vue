@@ -80,6 +80,7 @@
           </svg>
           Sensores
         </button>
+
         <button :class="['tab', tab === 'panico' ? 'active' : '']" @click="tab = 'panico'">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"/>
@@ -110,19 +111,83 @@
     <p>Sin registros de sensores</p>
         </div>
         <table v-else class="events-table">
-          <thead>
-            <tr><th>ID</th><th>Tipo</th><th>Valor</th><th>Alerta</th><th>Fecha</th></tr>
-          </thead>
-          <tbody>
-            <tr v-for="s in sensoresPaginados" :key="s.id" :class="s.alert ? 'row-alert' : ''">
-              <td class="cell-id">#{{ s.id }}</td>
-              <td><span :class="['type-badge', getTypeClass(s.type)]">{{ s.type }}</span></td>
-              <td class="cell-value">{{ s.value }}</td>
-              <td><span :class="['status-badge', s.alert ? 'alert' : 'normal']">{{ s.alert ? '🔥 Alerta' : '✓ Normal' }}</span></td>
-              <td class="cell-date">{{ formatDate(s.timestamp) }}</td>
-            </tr>
-          </tbody>
-        </table>
+  <thead>
+    <tr>
+      <th>ID</th><th>Tipo</th><th>Valor</th><th>Alerta</th><th>Fecha</th><th>Detalles</th>
+    </tr>
+  </thead>
+  <tbody>
+    <template v-for="s in sensoresPaginados" :key="s.id">
+      <tr :class="s.alert ? 'row-alert' : ''">
+        <td class="cell-id">#{{ s.id }}</td>
+        <td><span :class="['type-badge', getTypeClass(s.type)]">{{ s.type }}</span></td>
+        <td class="cell-value">{{ s.value }}</td>
+        <td><span :class="['status-badge', s.alert ? 'alert' : 'normal']">{{ s.alert ? '🔥 Alerta' : '✓ Normal' }}</span></td>
+        <td class="cell-date">{{ formatDate(s.timestamp) }}</td>
+      <td>
+        <!-- Se evalua directamente si s.alert es "truthy" (true, 1, o un string no vacío) -->
+        <button v-if="s.alert" class="detail-btn" @click="toggleDetalle(s.id)">
+          {{ eventoExpandido === s.id ? 'Cerrar' : 'Ver detalles' }}
+        </button>
+        <span v-else class="cell-id">—</span>
+      </td>
+      </tr>
+      <tr v-if="eventoExpandido === s.id" class="detail-row">
+        <td colspan="6">
+          <div v-if="getEventoAlerta(s)" class="detail-panel">
+
+          <!-- Barra en vivo / congelado -->
+          <div class="detail-status-bar">
+            <template v-if="!getEventoAlerta(s).timestamp_fin">
+              <span class="live-dot"></span>
+              <span class="live-label">En curso · actualizando en tiempo real</span>
+            </template>
+            <template v-else>
+              <span class="frozen-icon">❄️</span>
+              <span class="frozen-label">Alerta cerrada · datos fijos</span>
+            </template>
+          </div>
+
+          <!-- Tarjetas -->
+          <div class="detail-grid">
+            <div class="detail-card">
+              <span class="detail-card-label">Valor inicial</span>
+              <span class="detail-card-value">{{ getEventoAlerta(s).valor_inicio }}{{ s.type === 'gas' ? '%' : '°C' }}</span>
+              <span class="detail-card-sub">Al activarse la alerta</span>
+            </div>
+            <div class="detail-card pico-card">
+              <span class="detail-card-label">{{ getEventoAlerta(s).timestamp_fin ? 'Valor pico' : 'Valor actual / pico' }}</span>
+              <span class="detail-card-value pico">{{ getEventoAlerta(s).valor_pico }}{{ s.type === 'gas' ? '%' : '°C' }}</span>
+              <span class="detail-card-sub">{{ getEventoAlerta(s).timestamp_fin ? 'Máximo registrado' : 'Se actualiza en vivo' }}</span>
+            </div>
+            <div class="detail-card">
+              <span class="detail-card-label">Duración</span>
+              <span class="detail-card-value duration">{{ calcularDuracion(getEventoAlerta(s)) }}</span>
+              <span class="detail-card-sub">{{ getEventoAlerta(s).timestamp_fin ? 'Duración total' : 'Tiempo transcurrido' }}</span>
+            </div>
+            <div class="detail-card">
+              <span class="detail-card-label">Inicio alerta</span>
+              <span class="detail-card-value small">{{ formatDate(getEventoAlerta(s).timestamp_inicio) }}</span>
+              <span class="detail-card-sub">Hora de activación</span>
+            </div>
+            <div class="detail-card">
+              <span class="detail-card-label">Fin alerta</span>
+              <span class="detail-card-value small" :class="!getEventoAlerta(s).timestamp_fin ? 'en-curso' : ''">
+                {{ getEventoAlerta(s).timestamp_fin ? formatDate(getEventoAlerta(s).timestamp_fin) : 'En curso…' }}
+              </span>
+              <span class="detail-card-sub">Hora de cierre</span>
+            </div>
+          </div>
+        </div>
+      <div v-else class="detail-panel no-event">
+        <span class="cell-id">Sin datos de evento disponibles para este registro.</span>
+      </div>
+      </td>
+    </tr>
+        </template>
+      </tbody>
+    </table>
+
         <div v-if="totalPaginasSensores > 1" class="pagination">
           <button @click="paginaSensores--" :disabled="paginaSensores === 1" class="page-btn">‹</button>
           <span class="page-info">{{ paginaSensores }} / {{ totalPaginasSensores }}</span>
@@ -220,7 +285,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
 
@@ -232,6 +297,84 @@ const tab = ref('sensores')
 const modoHistorial = ref(localStorage.getItem('modoHistorial') || 'todo')
 const sensores = ref([])
 const panicos = ref([])
+
+const alertasEventos = ref([])
+const eventoExpandido = ref(null)
+const ahora = ref(new Date())
+let tickerInterval = null
+let pollInterval = null
+
+const startTicker = () => {
+  if (tickerInterval) return
+  tickerInterval = setInterval(() => {
+    ahora.value = new Date()
+  }, 1000)
+}
+
+const stopTicker = () => {
+  clearInterval(tickerInterval)
+  tickerInterval = null
+}
+
+const hayAlertasActivas = computed(() =>
+  alertasEventos.value.some(e => !e.timestamp_fin)
+)
+
+const startPoll = () => {
+  if (pollInterval) return
+
+  pollInterval = setInterval(async () => {
+    try {
+      const ae = await fetch(`${API_BASE}/api/alertas/eventos`)
+        .then(r => r.json())
+
+      alertasEventos.value = Array.isArray(ae) ? ae : []
+
+    } catch {}
+  }, 5000)
+}
+
+const stopPoll = () => {
+  clearInterval(pollInterval)
+  pollInterval = null
+}
+
+watch(hayAlertasActivas, (activas) => {
+  if (activas) {
+    startTicker()
+    startPoll()
+  } else {
+    stopTicker()
+    stopPoll()
+  }
+}, { immediate: true })
+
+const toggleDetalle = (id) => {
+  eventoExpandido.value = eventoExpandido.value === id ? null : id
+}
+
+const getEventoAlerta = (sensor) => {
+  if (!sensor.alert) return null
+
+  const eventos = Array.isArray(alertasEventos.value) ? alertasEventos.value : []
+
+  // Para cada evento activo del mismo tipo, calcular distancia al timestamp_inicio
+  const candidatos = eventos
+    .filter(e => {
+      if (e.type !== sensor.type) return false
+      const tsS  = new Date(sensor.timestamp.includes('Z') ? sensor.timestamp : sensor.timestamp + 'Z').getTime()
+      const tsIn = new Date(e.timestamp_inicio.includes('Z') ? e.timestamp_inicio : e.timestamp_inicio + 'Z').getTime()
+      return Math.abs(tsS - tsIn) <= 10000 // 10 segundos de margen
+    })
+    .map(e => {
+      const tsS  = new Date(sensor.timestamp.includes('Z') ? sensor.timestamp : sensor.timestamp + 'Z').getTime()
+      const tsIn = new Date(e.timestamp_inicio.includes('Z') ? e.timestamp_inicio : e.timestamp_inicio + 'Z').getTime()
+      return { evento: e, distancia: Math.abs(tsS - tsIn) }
+    })
+    .sort((a, b) => a.distancia - b.distancia)
+
+  return candidatos.length > 0 ? candidatos[0].evento : null
+}
 
 //==========
 const cambiarModo = async (modo) => {
@@ -329,15 +472,43 @@ const formatDate = (timestamp) => {
 
 const fetchData = async () => {
   try {
-    const [s, p] = await Promise.all([
+    const [s, p, ae] = await Promise.all([
       fetch(`${API_BASE}/api/sensor`).then(r => r.json()),
-      fetch(`${API_BASE}/api/panic`).then(r => r.json())
+      fetch(`${API_BASE}/api/panic`).then(r => r.json()),
+      fetch(`${API_BASE}/api/alertas/eventos`).then(r => r.json())
     ])
     sensores.value = Array.isArray(s) ? s : []
     panicos.value = Array.isArray(p) ? p : []
-  } catch {
-    // Mantener datos anteriores en caso de error
+    alertasEventos.value = Array.isArray(ae) ? ae : []
+  console.log('alertasEventos:', alertasEventos.value)  // ← agrega esto
+  } catch (err) {
+    console.error('fetchData error:', err)  // ← y esto
   }
+}
+
+const calcularDuracion = (evento) => {
+  if (!evento) return '—'
+
+  const inicio = new Date(
+    evento.timestamp_inicio.includes('Z')
+      ? evento.timestamp_inicio
+      : evento.timestamp_inicio + 'Z'
+  )
+
+  const fin = evento.timestamp_fin
+    ? new Date(
+        evento.timestamp_fin.includes('Z')
+          ? evento.timestamp_fin
+          : evento.timestamp_fin + 'Z'
+      )
+    : ahora.value
+
+  const seg = Math.floor((fin - inicio) / 1000)
+
+  if (seg < 60) return `${seg}s`
+  if (seg < 3600) return `${Math.floor(seg / 60)}m ${seg % 60}s`
+
+  return `${Math.floor(seg / 3600)}h ${Math.floor((seg % 3600) / 60)}m`
 }
 
 const handleLogout = async () => {
@@ -346,16 +517,22 @@ const handleLogout = async () => {
 }
 
 onMounted(async () => {
-  fetchData()
+  await fetchData()
   try {
     const res = await fetch(`${API_BASE}/api/config/modo`)
     const data = await res.json()
     modoHistorial.value = data.modo
     localStorage.setItem('modoHistorial', data.modo)
-  } catch {
-    //localStorage como fallback
+  } catch(err) {
+     console.error("ERROR FETCH:", err)
   }
 })
+
+onUnmounted(() => {
+  stopTicker()
+  stopPoll()
+})
+
 </script>
 
 <style scoped>
@@ -757,6 +934,79 @@ onMounted(async () => {
   color: white;
   font-weight: 700;
 }
+
+.detail-btn {
+  padding: 4px 12px;
+  background: rgba(249,115,22,0.1);
+  border: 1px solid rgba(249,115,22,0.3);
+  border-radius: 6px;
+  color: #F97316;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.detail-btn:hover { background: rgba(249,115,22,0.2); }
+
+.detail-row td { padding: 0 !important; border-bottom: 1px solid #262D3D; }
+
+.detail-panel {
+  display: flex;
+  gap: 24px;
+  padding: 16px 20px;
+  background: rgba(249,115,22,0.05);
+  flex-wrap: wrap;
+}
+
+.detail-item { display: flex; flex-direction: column; gap: 4px; }
+
+.detail-label {
+  font-size: 10px;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-status-bar { display: flex; align-items: center; gap: 8px; }
+
+.live-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #10B981;
+  box-shadow: 0 0 0 0 rgba(16,185,129,0.6);
+  animation: pulse-live 1.4s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes pulse-live {
+  0%   { box-shadow: 0 0 0 0 rgba(16,185,129,0.6); }
+  70%  { box-shadow: 0 0 0 7px rgba(16,185,129,0); }
+  100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+}
+.live-label   { font-size: 11px; color: #10B981; font-weight: 600; }
+.frozen-icon  { font-size: 13px; }
+.frozen-label { font-size: 11px; color: #475569; font-weight: 500; }
+
+.detail-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+
+.detail-card {
+  background: rgba(17,24,39,0.7); border: 1px solid #262D3D;
+  border-radius: 12px; padding: 14px 18px;
+  display: flex; flex-direction: column; gap: 4px;
+  min-width: 140px; flex: 1;
+}
+.detail-card.pico-card { border-color: rgba(249,115,22,0.4); background: rgba(249,115,22,0.06); }
+.detail-card.no-event  { flex-direction: row; align-items: center; }
+
+.detail-card-label { font-size: 10px; color: #475569; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600; }
+.detail-card-value { font-size: 22px; font-weight: 800; color: #F8FAFC; line-height: 1.1; }
+.detail-card-value.pico     { color: #F97316; }
+.detail-card-value.duration { color: #6366F1; font-variant-numeric: tabular-nums; }
+.detail-card-value.small    { font-size: 13px; font-weight: 600; }
+.detail-card-value.en-curso { color: #F59E0B; }
+.detail-card-sub { font-size: 11px; color: #334155; margin-top: 2px; }
+
+.detail-value { font-size: 16px; font-weight: 700; color: #F8FAFC; }
+.detail-value.pico { color: #F97316; }
+
 /* Responsive */
 @media (max-width: 768px) {
   .main-content { padding: 16px; }

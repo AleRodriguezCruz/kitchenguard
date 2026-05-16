@@ -419,12 +419,11 @@ let climaInterval = null
 // Sistema de Alertas
 const alertasActivas = ref([])
 const alertaCounter = ref(0)
+const gasAlertaInicio = ref(null)    // valor y hora cuando empezó
+const gasAlertaPico   = ref(0)       // valor máximo registrado
+const tempAlertaInicio = ref(null)  
+const tempAlertaPico   = ref(0)  
 const recomendaciones = ref([])
-
-// Variables para Descartar alertas
-const ultimoDescarteGas  = ref(parseInt(localStorage.getItem('ultimoDescarteGas'))  || 0)
-const ultimoDescarteTemp = ref(parseInt(localStorage.getItem('ultimoDescarteTemp')) || 0)
-const COOLDOWN_MS = 3 * 60 * 1000  // 3 minutos
 
 // Análisis de Riesgo
 const riesgoFuga = ref({
@@ -612,65 +611,96 @@ const formatAlertTimestamp = (ts) => {
     second: '2-digit'
   })
 }
-const generarAlertas = () => {
-  const ahoraMs = Date.now()
 
-  const yaHayAlertaGas = alertasActivas.value.some(a => a.tipo === 'gas')
+const generarAlertas = () => {
+  const yaHayAlertaGas  = alertasActivas.value.some(a => a.tipo === 'gas')
   const yaHayAlertaTemp = alertasActivas.value.some(a => a.tipo === 'temperatura')
-  const yaHayPanico = alertasActivas.value.some(a => a.titulo === '🆘 BOTON DE PANICO')
-  
-  if (status.value.gas_level >= 70 && !yaHayAlertaGas && (ahoraMs - ultimoDescarteGas.value) > COOLDOWN_MS) {
-    //Alerta gas peligro
+  const yaHayPanico     = alertasActivas.value.some(a => a.titulo === '🆘 BOTON DE PANICO')
+
+  // ── GAS ──────────────────────────────────────────────────
+  if (gasAlertaInicio.value && !yaHayAlertaGas) {
+    // Hay evento activo en BD pero no hay tarjeta → crearla
+    const titulo = status.value.gas_level >= 70 ? '¡FUGA DE GAS!' : 'Alerta de Gas'
+    const nivel  = status.value.gas_level >= 70 ? 10 : 7
     alertasActivas.value.unshift({
       id: ++alertaCounter.value, tipo: 'gas',
-      titulo: '¡FUGA DE GAS!', mensaje: `Nivel: ${status.value.gas_level}%`,
-      nivel: 10, timestamp: formatAlertTimestamp(status.value.gas_alert_at)
-    })
-  } else if (status.value.gas_level >= 45 && !yaHayAlertaGas && (ahoraMs - ultimoDescarteGas.value) > COOLDOWN_MS) {
-    //alerta gas precaucion
-    alertasActivas.value.unshift({
-      id: ++alertaCounter.value, tipo: 'gas',
-      titulo: 'Alerta de Gas', mensaje: `Concentración: ${status.value.gas_level}%`,
-      nivel: 7, timestamp: formatAlertTimestamp(status.value.gas_alert_at)
+      titulo, nivel,
+      mensaje:   `Inicio: ${gasAlertaInicio.value.valor}% · Actual: ${status.value.gas_level}% · Pico: ${gasAlertaPico.value}%`,
+      timestamp: gasAlertaInicio.value.hora
     })
   }
-  
-  if (status.value.gas_level < 20) {
+
+  if (yaHayAlertaGas && gasAlertaInicio.value) {
+    // Actualizar pico solo si el backend reportó uno mayor
+    if (status.value.gas_level > gasAlertaPico.value) {
+      gasAlertaPico.value = status.value.gas_level
+    }
+    alertasActivas.value = alertasActivas.value.map(a =>
+      a.tipo === 'gas'
+        ? { ...a,
+            mensaje:   `Inicio: ${gasAlertaInicio.value.valor}% · Actual: ${status.value.gas_level}% · Pico: ${gasAlertaPico.value}%`,
+            timestamp: gasAlertaInicio.value.hora }
+        : a
+    )
+  }
+
+  // Si el backend ya no reporta evento activo, quitar tarjeta
+  if (!gasAlertaInicio.value) {
     alertasActivas.value = alertasActivas.value.filter(a => a.tipo !== 'gas')
   }
-  
-  if (status.value.temperature >= 60 && !yaHayAlertaTemp && (ahoraMs - ultimoDescarteTemp.value) > COOLDOWN_MS) {
+
+  // ── TEMPERATURA ───────────────────────────────────────────
+  if (tempAlertaInicio.value && !yaHayAlertaTemp) {
     alertasActivas.value.unshift({
       id: ++alertaCounter.value, tipo: 'temperatura',
-      titulo: 'Sobrecalentamiento', mensaje: `Temp: ${status.value.temperature}°C`,
-      nivel: 9, timestamp: formatAlertTimestamp(status.value.temp_alert_at)
+      titulo: 'Sobrecalentamiento', nivel: 9,
+      mensaje:   `Inicio: ${tempAlertaInicio.value.valor}°C · Actual: ${status.value.temperature}°C · Pico: ${tempAlertaPico.value}°C`,
+      timestamp: tempAlertaInicio.value.hora
     })
   }
-  
-  if (status.value.temperature < 40) {
+
+  if (yaHayAlertaTemp && tempAlertaInicio.value) {
+    if (status.value.temperature > tempAlertaPico.value) {
+      tempAlertaPico.value = status.value.temperature
+    }
+    alertasActivas.value = alertasActivas.value.map(a =>
+      a.tipo === 'temperatura'
+        ? { ...a,
+            mensaje:   `Inicio: ${tempAlertaInicio.value.valor}°C · Actual: ${status.value.temperature}°C · Pico: ${tempAlertaPico.value}°C`,
+            timestamp: tempAlertaInicio.value.hora }
+        : a
+    )
+  }
+
+  if (!tempAlertaInicio.value) {
     alertasActivas.value = alertasActivas.value.filter(a => a.tipo !== 'temperatura')
   }
 
+  // ── PÁNICO ────────────────────────────────────────────────
   if (panicEventoActivo.value && !yaHayPanico) {
-  alertasActivas.value.unshift({
-    id:        ++alertaCounter.value,
-    tipo:      'estufa',
-    titulo:    '🆘 BOTON DE PANICO',
-    mensaje:   `Emergencia enviada · ${panicEventoActivo.value.intentos} pulsación${panicEventoActivo.value.intentos > 1 ? 'es' : ''}`,
-    nivel:     10,
-    timestamp: formatAlertTimestamp(status.value.panic_at),
-    panicId:   panicEventoActivo.value.id   //guardamos el ID del evento
-  })
-}
+    alertasActivas.value.unshift({
+      id:        ++alertaCounter.value,
+      tipo:      'estufa',
+      titulo:    '🆘 BOTON DE PANICO',
+      mensaje:   `Emergencia enviada · ${panicEventoActivo.value.intentos} pulsación${panicEventoActivo.value.intentos > 1 ? 'es' : ''}`,
+      nivel:     10,
+      timestamp: formatAlertTimestamp(status.value.panic_at),
+      panicId:   panicEventoActivo.value.id
+    })
+  }
 
   if (panicEventoActivo.value && yaHayPanico) {
-  alertasActivas.value = alertasActivas.value.map(a =>
-    a.titulo === '🆘 BOTON DE PANICO'
-      ? { ...a, mensaje: `Emergencia enviada · ${panicEventoActivo.value.intentos} pulsación${panicEventoActivo.value.intentos > 1 ? 'es' : ''}` }
-      : a
-  )
-}
-  // Mantener máximo 3 alertas
+    alertasActivas.value = alertasActivas.value.map(a =>
+      a.titulo === '🆘 BOTON DE PANICO'
+        ? { ...a, mensaje: `Emergencia enviada · ${panicEventoActivo.value.intentos} pulsación${panicEventoActivo.value.intentos > 1 ? 'es' : ''}` }
+        : a
+    )
+  }
+
+  if (!panicEventoActivo.value) {
+    alertasActivas.value = alertasActivas.value.filter(a => a.titulo !== '🆘 BOTON DE PANICO')
+  }
+
   if (alertasActivas.value.length > 3) {
     alertasActivas.value = alertasActivas.value.slice(0, 3)
   }
@@ -731,10 +761,43 @@ const actualizarGraficoGas = (ctx, width, height) => {
 // API──────────────────────────────────────────────────
 const fetchStatus = async () => {
   try {
-    const res = await fetch(`${API_BASE}/api/sensor/latest`)
+    const [res, ae] = await Promise.all([
+      fetch(`${API_BASE}/api/sensor/latest`),
+      fetch(`${API_BASE}/api/alertas/eventos`)
+    ])
     const data = await res.json()
+    const eventos = await ae.json()
     status.value = data
     connected.value = true
+
+    // Restaurar desde el evento activo real (valor_inicio correcto)
+    const gasActivo  = Array.isArray(eventos) ? eventos.find(e => e.type === 'gas'         && e.activa) : null
+    const tempActivo = Array.isArray(eventos) ? eventos.find(e => e.type === 'temperatura' && e.activa) : null
+
+    if (gasActivo && !gasAlertaInicio.value) {
+      gasAlertaInicio.value = {
+        valor: gasActivo.valor_inicio,  // ← valor real del inicio
+        hora:  formatAlertTimestamp(gasActivo.timestamp_inicio)
+      }
+      gasAlertaPico.value = gasActivo.valor_pico
+    }
+    if (!gasActivo) {
+      gasAlertaInicio.value = null
+      gasAlertaPico.value = 0
+    }
+
+    if (tempActivo && !tempAlertaInicio.value) {
+      tempAlertaInicio.value = {
+        valor: tempActivo.valor_inicio,  // ← valor real del inicio
+        hora:  formatAlertTimestamp(tempActivo.timestamp_inicio)
+      }
+      tempAlertaPico.value = tempActivo.valor_pico
+    }
+    if (!tempActivo) {
+      tempAlertaInicio.value = null
+      tempAlertaPico.value = 0
+    }
+
     analizarRiesgos()
     generarAlertas()
   } catch {
@@ -760,14 +823,29 @@ const descartarAlerta = async (alertaId) => {
   const alerta = alertasActivas.value.find(a => a.id === alertaId)
 
   if (alerta?.tipo === 'gas') {
-  ultimoDescarteGas.value = Date.now()
-  localStorage.setItem('ultimoDescarteGas', Date.now())
-  }
+  gasAlertaInicio.value = null
+  gasAlertaPico.value = 0
+
+      try {
+          await fetch(`${API_BASE}/api/alertas/eventos/cerrar-activo`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'gas' })
+          })
+        } catch (err) { console.error('Error cerrando evento gas:', err) }
+      }
 
   if (alerta?.tipo === 'temperatura') {
-  ultimoDescarteTemp.value = Date.now()
-  localStorage.setItem('ultimoDescarteTemp', Date.now())
-  }
+  tempAlertaInicio.value = null  
+  tempAlertaPico.value = 0 
+      try {
+          await fetch(`${API_BASE}/api/alertas/eventos/cerrar-activo`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'temperatura' })
+          })
+        } catch (err) { console.error('Error cerrando evento temp:', err) }     
+      }
   // Si es una alerta de pánico, marcarla como atendida en el backend
   if (alerta?.panicId) {
     try {
@@ -781,22 +859,20 @@ const descartarAlerta = async (alertaId) => {
   }
 
   alertasActivas.value = alertasActivas.value.filter(a => a.id !== alertaId)
-  if (status.value.stove_on) {
+  /*if (status.value.stove_on) {
     await fetch(`${API_BASE}/api/sensor`, { method:'POST', 
     headers:{'Content-Type':'application/json'}, body:JSON.stringify({type:'gas',value:0,alert:0}) 
   })
     //status.value.stove_on = false; 
     //status.value.gas_level = 0
-  }
+  } */
 }
 
 const formatTime = (t) => new Date(t).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'})
 const investigarEvento = (e) => console.log('Evento:', e)
 
-const handleLogout = async () => { 
-  localStorage.removeItem('ultimoDescarteGas') //limpiar antes de redirigir
-  localStorage.removeItem('ultimoDescarteTemp')
-  await logout(); 
+const handleLogout = async () => {  
+  await logout()
   router.push('/login') 
 }
 
