@@ -51,11 +51,15 @@
           </svg>
           <h2>Historial de Eventos</h2>
         </div>
-        <div class="modo-toggle">
-          <span class="modo-label">💾 Guardar:</span>
-          <button :class="['modo-btn', modoHistorial === 'todo' ? 'active' : '']" @click="cambiarModo('todo')">Todo</button>
-          <button :class="['modo-btn', modoHistorial === 'solo_alertas' ? 'active' : '']" @click="cambiarModo('solo_alertas')">Solo alertas</button>
-        </div>
+      <div class="modo-toggle">
+        <span class="modo-label">💾 Todo:</span>
+        <button :class="['modo-btn', modoHistorial === 'cada_5min' ? 'active' : '']" @click="cambiarModo('cada_5min')">5 min</button>
+        <button :class="['modo-btn', modoHistorial === 'cada_30min' ? 'active' : '']" @click="cambiarModo('cada_30min')">30 min</button>
+        <button :class="['modo-btn', modoHistorial === 'cada_hora' ? 'active' : '']" @click="cambiarModo('cada_hora')">1 hora</button>
+        <button :class="['modo-btn', modoHistorial === 'cada_24h' ? 'active' : '']" @click="cambiarModo('cada_24h')">24 hrs</button>
+        <span class="modo-separator">|</span>
+        <button :class="['modo-btn', modoHistorial === 'solo_alertas' ? 'active' : '']" @click="cambiarModo('solo_alertas')">Solo alertas</button>
+      </div>
         <div class="header-stats">
           <div class="header-stat">
             <span class="header-stat-value">{{ sensores.length }}</span>
@@ -236,30 +240,91 @@
   </div>
   <table v-else class="events-table">
     <thead>
-      <tr><th>ID</th><th>Tipo</th><th>Detalle</th><th>Estado</th><th>Fecha</th></tr>
-    </thead>
-    <tbody>
-      <tr v-for="item in todosPaginados" :key="item._tabla + item.id"
-          :class="item._tabla === 'panico' ? 'row-panic' : item.alert ? 'row-alert' : ''">
-        <td class="cell-id">#{{ item.id }}</td>
-        <td>
-          <span v-if="item._tabla === 'sensor'" :class="['type-badge', getTypeClass(item.type)]">{{ item.type }}</span>
-          <span v-else class="type-badge fire">🆘 Pánico</span>
-        </td>
-        <td class="cell-value">
-          <span v-if="item._tabla === 'sensor'">{{ item.value }}</span>
-          <span v-else>Botón de emergencia</span>
-        </td>
-        <td>
-          <span v-if="item._tabla === 'sensor'" :class="['status-badge', item.alert ? 'alert' : 'normal']">
-            {{ item.alert ? '🔥 Alerta' : '✓ Normal' }}
-          </span>
-          <span v-else :class="['status-badge', item.atendido ? 'normal' : 'alert']">
-            {{ item.atendido ? '✓ Cerrada' : '🆘 Activa' }}
-          </span>
-        </td>
-      <td class="cell-date">{{ formatDate(item.timestamp) }}</td>
+      <tr>
+        <th>ID</th>
+        <th>Tipo</th>
+        <th>Detalle</th>
+        <th>Estado</th>
+        <th>Fecha</th>
+        <th>Detalles</th>
       </tr>
+        
+    </thead>
+      <tbody>
+      <template v-for="item in todosPaginados" :key="item._tabla + item.id">
+        <tr :class="item._tabla === 'panico' ? 'row-panic' : item.alert ? 'row-alert' : ''">
+          <td class="cell-id">#{{ item.id }}</td>
+          <td>
+            <span v-if="item._tabla === 'sensor'" :class="['type-badge', getTypeClass(item.type)]">{{ item.type }}</span>
+            <span v-else class="type-badge fire">🆘 Pánico</span>
+          </td>
+          <td class="cell-value">
+            <span v-if="item._tabla === 'sensor'">{{ item.value }}</span>
+            <span v-else>Botón de emergencia</span>
+          </td>
+          <td>
+            <span v-if="item._tabla === 'sensor'" :class="['status-badge', item.alert ? 'alert' : 'normal']">
+              {{ item.alert ? '🔥 Alerta' : '✓ Normal' }}
+            </span>
+            <span v-else :class="['status-badge', item.atendido ? 'normal' : 'alert']">
+              {{ item.atendido ? '✓ Cerrada' : '🆘 Activa' }}
+            </span>
+          </td>
+          <td class="cell-date">{{ formatDate(item.timestamp) }}</td>
+          <td>
+            <button v-if="item._tabla === 'sensor' && item.alert && getEventoAlerta(item)"
+                    class="detail-btn" @click="toggleDetalle(item._tabla + item.id)">
+              {{ eventoExpandido === item._tabla + item.id ? 'Cerrar' : 'Ver detalles' }}
+            </button>
+            <span v-else class="cell-id">—</span>
+          </td>
+        </tr>
+        <tr v-if="eventoExpandido === item._tabla + item.id" class="detail-row">
+          <td colspan="6">
+            <div class="detail-panel">
+              <div class="detail-status-bar">
+                <template v-if="!getEventoAlerta(item).timestamp_fin">
+                  <span class="live-dot"></span>
+                  <span class="live-label">En curso · actualizando en tiempo real</span>
+                </template>
+                <template v-else>
+                  <span class="frozen-icon">❄️</span>
+                  <span class="frozen-label">Alerta cerrada · datos fijos</span>
+                </template>
+              </div>
+              <div class="detail-grid">
+                <div class="detail-card">
+                  <span class="detail-card-label">Valor inicial</span>
+                  <span class="detail-card-value">{{ getEventoAlerta(item).valor_inicio }}{{ item.type === 'gas' ? '%' : '°C' }}</span>
+                  <span class="detail-card-sub">Al activarse la alerta</span>
+                </div>
+                <div class="detail-card pico-card">
+                  <span class="detail-card-label">{{ getEventoAlerta(item).timestamp_fin ? 'Valor pico' : 'Valor actual / pico' }}</span>
+                  <span class="detail-card-value pico">{{ getEventoAlerta(item).valor_pico }}{{ item.type === 'gas' ? '%' : '°C' }}</span>
+                  <span class="detail-card-sub">{{ getEventoAlerta(item).timestamp_fin ? 'Máximo registrado' : 'Se actualiza en vivo' }}</span>
+                </div>
+                <div class="detail-card">
+                  <span class="detail-card-label">Duración</span>
+                  <span class="detail-card-value duration">{{ calcularDuracion(getEventoAlerta(item)) }}</span>
+                  <span class="detail-card-sub">{{ getEventoAlerta(item).timestamp_fin ? 'Duración total' : 'Tiempo transcurrido' }}</span>
+                </div>
+                <div class="detail-card">
+                  <span class="detail-card-label">Inicio alerta</span>
+                  <span class="detail-card-value small">{{ formatDate(getEventoAlerta(item).timestamp_inicio) }}</span>
+                  <span class="detail-card-sub">Hora de activación</span>
+                </div>
+                <div class="detail-card">
+                  <span class="detail-card-label">Fin alerta</span>
+                  <span class="detail-card-value small" :class="!getEventoAlerta(item).timestamp_fin ? 'en-curso' : ''">
+                    {{ getEventoAlerta(item).timestamp_fin ? formatDate(getEventoAlerta(item).timestamp_fin) : 'En curso…' }}
+                  </span>
+                  <span class="detail-card-sub">Hora de cierre</span>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </template>
     </tbody>
   </table>
   <div v-if="totalPaginasTodos > 1" class="pagination">
@@ -294,9 +359,12 @@ const { logout } = useAuth()
 const API_BASE = import.meta.env.VITE_API_BASE
 
 const tab = ref('sensores')
-const modoHistorial = ref(localStorage.getItem('modoHistorial') || 'todo')
 const sensores = ref([])
 const panicos = ref([])
+
+const modosValidos = ['solo_alertas', 'cada_5min', 'cada_30min', 'cada_hora', 'cada_24h']
+const savedModo = localStorage.getItem('modoHistorial')
+const modoHistorial = ref(modosValidos.includes(savedModo) ? savedModo : 'cada_5min')
 
 const alertasEventos = ref([])
 const eventoExpandido = ref(null)
@@ -1003,6 +1071,13 @@ onUnmounted(() => {
 .detail-card-value.small    { font-size: 13px; font-weight: 600; }
 .detail-card-value.en-curso { color: #F59E0B; }
 .detail-card-sub { font-size: 11px; color: #334155; margin-top: 2px; }
+
+.modo-separator {
+  color: #262D3D;
+  font-size: 18px;
+  padding: 0 4px;
+  user-select: none;
+}
 
 .detail-value { font-size: 16px; font-weight: 700; color: #F8FAFC; }
 .detail-value.pico { color: #F97316; }
