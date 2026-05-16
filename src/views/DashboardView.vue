@@ -602,8 +602,17 @@ const generarRecomendaciones = () => {
   recomendaciones.value = recs
 }
 
+// formatear timestamp del backend
+const formatAlertTimestamp = (ts) => {
+  if (!ts) return new Date().toLocaleTimeString()
+  return new Date(ts.includes('Z') ? ts : ts + 'Z').toLocaleTimeString('es-MX', {
+    timeZone: 'America/Ensenada',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  })
+}
 const generarAlertas = () => {
-  const ahora = new Date().toLocaleTimeString()
   const ahoraMs = Date.now()
 
   const yaHayAlertaGas = alertasActivas.value.some(a => a.tipo === 'gas')
@@ -615,14 +624,14 @@ const generarAlertas = () => {
     alertasActivas.value.unshift({
       id: ++alertaCounter.value, tipo: 'gas',
       titulo: '¡FUGA DE GAS!', mensaje: `Nivel: ${status.value.gas_level}%`,
-      nivel: 10, timestamp: ahora
+      nivel: 10, timestamp: formatAlertTimestamp(status.value.gas_alert_at)
     })
   } else if (status.value.gas_level >= 45 && !yaHayAlertaGas && (ahoraMs - ultimoDescarteGas.value) > COOLDOWN_MS) {
     //alerta gas precaucion
     alertasActivas.value.unshift({
       id: ++alertaCounter.value, tipo: 'gas',
       titulo: 'Alerta de Gas', mensaje: `Concentración: ${status.value.gas_level}%`,
-      nivel: 7, timestamp: ahora
+      nivel: 7, timestamp: formatAlertTimestamp(status.value.gas_alert_at)
     })
   }
   
@@ -634,7 +643,7 @@ const generarAlertas = () => {
     alertasActivas.value.unshift({
       id: ++alertaCounter.value, tipo: 'temperatura',
       titulo: 'Sobrecalentamiento', mensaje: `Temp: ${status.value.temperature}°C`,
-      nivel: 9, timestamp: ahora
+      nivel: 9, timestamp: formatAlertTimestamp(status.value.temp_alert_at)
     })
   }
   
@@ -649,7 +658,7 @@ const generarAlertas = () => {
     titulo:    '🆘 BOTON DE PANICO',
     mensaje:   `Emergencia enviada · ${panicEventoActivo.value.intentos} pulsación${panicEventoActivo.value.intentos > 1 ? 'es' : ''}`,
     nivel:     10,
-    timestamp: new Date().toLocaleTimeString(),
+    timestamp: formatAlertTimestamp(status.value.panic_at),
     panicId:   panicEventoActivo.value.id   //guardamos el ID del evento
   })
 }
@@ -783,7 +792,13 @@ const descartarAlerta = async (alertaId) => {
 
 const formatTime = (t) => new Date(t).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'})
 const investigarEvento = (e) => console.log('Evento:', e)
-const handleLogout = async () => { await logout(); router.push('/login') }
+
+const handleLogout = async () => { 
+  localStorage.removeItem('ultimoDescarteGas') //limpiar antes de redirigir
+  localStorage.removeItem('ultimoDescarteTemp')
+  await logout(); 
+  router.push('/login') 
+}
 
 const simularDatosEventos = () => {
   const tipos = ['Gas','Temperatura','Estufa','Sistema']
