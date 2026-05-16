@@ -360,6 +360,11 @@ const API_BASE = import.meta.env.VITE_API_BASE
 
 const tab = ref('sensores')
 const sensores = ref([])
+const sensoresOrdenados = computed(() => {
+  const alertasActivas = sensores.value.filter(s => s.alert && alertasEventos.value.some(e => e.type === s.type && e.activa))
+  const resto = sensores.value.filter(s => !alertasActivas.includes(s))
+  return [...alertasActivas, ...resto]
+})
 const panicos = ref([])
 
 const modosValidos = ['solo_alertas', 'cada_5min', 'cada_30min', 'cada_hora', 'cada_24h']
@@ -468,7 +473,7 @@ const porPagina = 10 // Registros por pág. 10
 // Paginación de sensores
 const sensoresPaginados = computed(() => {
   const inicio = (paginaSensores.value - 1) * porPagina
-  return sensores.value.slice(inicio, inicio + porPagina)
+  return sensoresOrdenados.value.slice(inicio, inicio + porPagina)
 })
 // Paginación eventos de pánico
 const panicosPaginados = computed(() => {
@@ -479,11 +484,23 @@ const panicosPaginados = computed(() => {
 const todosCombinados = computed(() => {
   const sens = sensores.value.map(s => ({ ...s, _tabla: 'sensor' }))
   const pan  = panicos.value.map(p => ({ ...p, _tabla: 'panico' }))
-  return [...sens, ...pan].sort((a, b) => {
-    const fechaA = new Date(a.timestamp.includes('Z') ? a.timestamp : a.timestamp + 'Z')
-    const fechaB = new Date(b.timestamp.includes('Z') ? b.timestamp : b.timestamp + 'Z')
-    return fechaB - fechaA
-  })
+  const todos = [...sens, ...pan]
+
+  const alertasActivas = todos.filter(item =>
+    item._tabla === 'sensor' &&
+    item.alert &&
+    alertasEventos.value.some(e => e.type === item.type && e.activa)
+  )
+
+  const resto = todos
+    .filter(item => !alertasActivas.includes(item))
+    .sort((a, b) => {
+      const fechaA = new Date(a.timestamp.includes('Z') ? a.timestamp : a.timestamp + 'Z')
+      const fechaB = new Date(b.timestamp.includes('Z') ? b.timestamp : b.timestamp + 'Z')
+      return fechaB - fechaA
+    })
+
+  return [...alertasActivas, ...resto]
 })
 
 const todosPaginados = computed(() => {
@@ -503,7 +520,7 @@ watch(tab, () => {
 
 //==============Filtros=========
 const eventosFiltrados = computed(() => {
-  if (tab.value === 'sensores') return sensores.value
+  if (tab.value === 'sensores') return sensoresOrdenados.value
   if (tab.value === 'panico') return panicos.value
   return todosCombinados.value
 })
@@ -548,9 +565,8 @@ const fetchData = async () => {
     sensores.value = Array.isArray(s) ? s : []
     panicos.value = Array.isArray(p) ? p : []
     alertasEventos.value = Array.isArray(ae) ? ae : []
-  console.log('alertasEventos:', alertasEventos.value)  // ← agrega esto
   } catch (err) {
-    console.error('fetchData error:', err)  // ← y esto
+    console.error('fetchData error:', err)  
   }
 }
 
