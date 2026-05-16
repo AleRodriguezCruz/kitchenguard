@@ -421,6 +421,11 @@ const alertasActivas = ref([])
 const alertaCounter = ref(0)
 const recomendaciones = ref([])
 
+// Variables para Descartar alertas
+const ultimoDescarteGas  = ref(parseInt(localStorage.getItem('ultimoDescarteGas'))  || 0)
+const ultimoDescarteTemp = ref(parseInt(localStorage.getItem('ultimoDescarteTemp')) || 0)
+const COOLDOWN_MS = 3 * 60 * 1000  // 3 minutos
+
 // Análisis de Riesgo
 const riesgoFuga = ref({
   porcentaje: 0,
@@ -599,18 +604,21 @@ const generarRecomendaciones = () => {
 
 const generarAlertas = () => {
   const ahora = new Date().toLocaleTimeString()
-  
+  const ahoraMs = Date.now()
+
   const yaHayAlertaGas = alertasActivas.value.some(a => a.tipo === 'gas')
   const yaHayAlertaTemp = alertasActivas.value.some(a => a.tipo === 'temperatura')
   const yaHayPanico = alertasActivas.value.some(a => a.titulo === '🆘 BOTON DE PANICO')
   
-  if (status.value.gas_level >= 70 && !yaHayAlertaGas) {
+  if (status.value.gas_level >= 70 && !yaHayAlertaGas && (ahoraMs - ultimoDescarteGas.value) > COOLDOWN_MS) {
+    //Alerta gas peligro
     alertasActivas.value.unshift({
       id: ++alertaCounter.value, tipo: 'gas',
       titulo: '¡FUGA DE GAS!', mensaje: `Nivel: ${status.value.gas_level}%`,
       nivel: 10, timestamp: ahora
     })
-  } else if (status.value.gas_level >= 45 && !yaHayAlertaGas) {
+  } else if (status.value.gas_level >= 45 && !yaHayAlertaGas && (ahoraMs - ultimoDescarteGas.value) > COOLDOWN_MS) {
+    //alerta gas precaucion
     alertasActivas.value.unshift({
       id: ++alertaCounter.value, tipo: 'gas',
       titulo: 'Alerta de Gas', mensaje: `Concentración: ${status.value.gas_level}%`,
@@ -622,7 +630,7 @@ const generarAlertas = () => {
     alertasActivas.value = alertasActivas.value.filter(a => a.tipo !== 'gas')
   }
   
-  if (status.value.temperature >= 60 && !yaHayAlertaTemp) {
+  if (status.value.temperature >= 60 && !yaHayAlertaTemp && (ahoraMs - ultimoDescarteTemp.value) > COOLDOWN_MS) {
     alertasActivas.value.unshift({
       id: ++alertaCounter.value, tipo: 'temperatura',
       titulo: 'Sobrecalentamiento', mensaje: `Temp: ${status.value.temperature}°C`,
@@ -742,6 +750,15 @@ const descartarAlerta = async (alertaId) => {
 
   const alerta = alertasActivas.value.find(a => a.id === alertaId)
 
+  if (alerta?.tipo === 'gas') {
+  ultimoDescarteGas.value = Date.now()
+  localStorage.setItem('ultimoDescarteGas', Date.now())
+  }
+
+  if (alerta?.tipo === 'temperatura') {
+  ultimoDescarteTemp.value = Date.now()
+  localStorage.setItem('ultimoDescarteTemp', Date.now())
+  }
   // Si es una alerta de pánico, marcarla como atendida en el backend
   if (alerta?.panicId) {
     try {
@@ -759,8 +776,8 @@ const descartarAlerta = async (alertaId) => {
     await fetch(`${API_BASE}/api/sensor`, { method:'POST', 
     headers:{'Content-Type':'application/json'}, body:JSON.stringify({type:'gas',value:0,alert:0}) 
   })
-    status.value.stove_on = false; 
-    status.value.gas_level = 0
+    //status.value.stove_on = false; 
+    //status.value.gas_level = 0
   }
 }
 
