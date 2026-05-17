@@ -360,16 +360,28 @@ const API_BASE = import.meta.env.VITE_API_BASE
 
 const tab = ref('sensores')
 const sensores = ref([])
+
+// Convierte timestamp de SQLite a milisegundos UTC
+// SQLite no incluye 'Z', JS necesita 'Z' para interpretar como UTC
+const toMs = (ts) => new Date(ts.includes('Z') ? ts : ts + 'Z').getTime()
+
 const sensoresOrdenados = computed(() => {
-  const alertasActivas = sensores.value.filter(s => s.alert && alertasEventos.value.some(e => e.type === s.type && e.activa))
+  const alertasActivas = sensores.value.filter(s => {
+    if (!s.alert) return false
+    return alertasEventos.value.some(e => {
+      if (e.type !== s.type || !e.activa) return false
+      return Math.abs(toMs(s.timestamp) - toMs(e.timestamp_inicio)) <= 10000
+    })
+  })
   const resto = sensores.value.filter(s => !alertasActivas.includes(s))
   return [...alertasActivas, ...resto]
 })
+
+
 const panicos = ref([])
 
 const modosValidos = ['solo_alertas', 'cada_5min', 'cada_30min', 'cada_hora', 'cada_24h']
-const savedModo = localStorage.getItem('modoHistorial')
-const modoHistorial = ref(modosValidos.includes(savedModo) ? savedModo : 'cada_5min')
+const modoHistorial = ref('solo_alertas') // temporal hasta que onMounted cargue el valor real
 
 const alertasEventos = ref([])
 const eventoExpandido = ref(null)
@@ -431,19 +443,15 @@ const getEventoAlerta = (sensor) => {
 
   const eventos = Array.isArray(alertasEventos.value) ? alertasEventos.value : []
 
-  // Para cada evento activo del mismo tipo, calcular distancia al timestamp_inicio
   const candidatos = eventos
     .filter(e => {
       if (e.type !== sensor.type) return false
-      const tsS  = new Date(sensor.timestamp.includes('Z') ? sensor.timestamp : sensor.timestamp + 'Z').getTime()
-      const tsIn = new Date(e.timestamp_inicio.includes('Z') ? e.timestamp_inicio : e.timestamp_inicio + 'Z').getTime()
-      return Math.abs(tsS - tsIn) <= 10000 // 10 segundos de margen
+      return Math.abs(toMs(sensor.timestamp) - toMs(e.timestamp_inicio)) <= 10000
     })
-    .map(e => {
-      const tsS  = new Date(sensor.timestamp.includes('Z') ? sensor.timestamp : sensor.timestamp + 'Z').getTime()
-      const tsIn = new Date(e.timestamp_inicio.includes('Z') ? e.timestamp_inicio : e.timestamp_inicio + 'Z').getTime()
-      return { evento: e, distancia: Math.abs(tsS - tsIn) }
-    })
+    .map(e => ({
+      evento: e,
+      distancia: Math.abs(toMs(sensor.timestamp) - toMs(e.timestamp_inicio))
+    }))
     .sort((a, b) => a.distancia - b.distancia)
 
   return candidatos.length > 0 ? candidatos[0].evento : null
@@ -458,7 +466,6 @@ const cambiarModo = async (modo) => {
       body: JSON.stringify({ modo })
     })
     modoHistorial.value = modo
-    localStorage.setItem('modoHistorial', modo)
   } catch {
     console.error('Error al cambiar modo')
   }
@@ -486,19 +493,17 @@ const todosCombinados = computed(() => {
   const pan  = panicos.value.map(p => ({ ...p, _tabla: 'panico' }))
   const todos = [...sens, ...pan]
 
-  const alertasActivas = todos.filter(item =>
-    item._tabla === 'sensor' &&
-    item.alert &&
-    alertasEventos.value.some(e => e.type === item.type && e.activa)
-  )
+  const alertasActivas = todos.filter(item => {
+    if (item._tabla !== 'sensor' || !item.alert) return false
+    return alertasEventos.value.some(e => {
+      if (e.type !== item.type || !e.activa) return false
+      return Math.abs(toMs(item.timestamp) - toMs(e.timestamp_inicio)) <= 10000
+    })
+  })
 
   const resto = todos
     .filter(item => !alertasActivas.includes(item))
-    .sort((a, b) => {
-      const fechaA = new Date(a.timestamp.includes('Z') ? a.timestamp : a.timestamp + 'Z')
-      const fechaB = new Date(b.timestamp.includes('Z') ? b.timestamp : b.timestamp + 'Z')
-      return fechaB - fechaA
-    })
+    .sort((a, b) => toMs(b.timestamp) - toMs(a.timestamp))
 
   return [...alertasActivas, ...resto]
 })
@@ -539,15 +544,13 @@ const getTypeClass = (type) => {
 const formatDate = (timestamp) => {
   if (!timestamp) return '—'
   try {
-    
-    const date = new Date(timestamp.includes('Z') ? timestamp : timestamp + 'Z')
-    return date.toLocaleString('es-MX', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
+    return new Date(toMs(timestamp)).toLocaleString('es-MX', {
+      year:     'numeric',
+      month:    'short',
+      day:      'numeric',
+      hour:     '2-digit',
+      minute:   '2-digit',
+      second:   '2-digit',
       timeZone: 'America/Ensenada'
     })
   } catch {
@@ -573,25 +576,15 @@ const fetchData = async () => {
 const calcularDuracion = (evento) => {
   if (!evento) return '—'
 
-  const inicio = new Date(
-    evento.timestamp_inicio.includes('Z')
-      ? evento.timestamp_inicio
-      : evento.timestamp_inicio + 'Z'
-  )
-
-  const fin = evento.timestamp_fin
-    ? new Date(
-        evento.timestamp_fin.includes('Z')
-          ? evento.timestamp_fin
-          : evento.timestamp_fin + 'Z'
-      )
+  const inicio = new Date(toMs(evento.timestamp_inicio))
+  const fin    = evento.timestamp_fin
+    ? new Date(toMs(evento.timestamp_fin))
     : ahora.value
 
   const seg = Math.floor((fin - inicio) / 1000)
 
-  if (seg < 60) return `${seg}s`
+  if (seg < 60)   return `${seg}s`
   if (seg < 3600) return `${Math.floor(seg / 60)}m ${seg % 60}s`
-
   return `${Math.floor(seg / 3600)}h ${Math.floor((seg % 3600) / 60)}m`
 }
 
@@ -1042,15 +1035,6 @@ onUnmounted(() => {
   flex-wrap: wrap;
 }
 
-.detail-item { display: flex; flex-direction: column; gap: 4px; }
-
-.detail-label {
-  font-size: 10px;
-  color: #475569;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
 .detail-status-bar { display: flex; align-items: center; gap: 8px; }
 
 .live-dot {
@@ -1094,9 +1078,6 @@ onUnmounted(() => {
   padding: 0 4px;
   user-select: none;
 }
-
-.detail-value { font-size: 16px; font-weight: 700; color: #F8FAFC; }
-.detail-value.pico { color: #F97316; }
 
 /* Responsive */
 @media (max-width: 768px) {
