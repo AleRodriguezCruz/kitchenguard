@@ -241,7 +241,7 @@
           <span>Actualizando...</span>
         </div>
         <div class="table-header">
-          <h3>Registros de Pánico</h3>
+          <h3>{{ modoSeleccion ? 'Selecciona para eliminar' : 'Registros de Pánico' }}</h3>
           <span class="table-count">{{ panicos.length }} registros</span>
         </div>
         <div v-if="panicos.length === 0" class="empty-state">
@@ -299,7 +299,7 @@
     <span>Actualizando...</span>
   </div>
   <div class="table-header">
-    <h3>Todos los Registros</h3>
+    <h3>{{ modoSeleccion ? 'Selecciona para eliminar' : 'Todos los Registros' }}</h3>
     <span class="table-count">{{ todosCombinados.length }} registros</span>
   </div>
   <div v-if="todosCombinados.length === 0" class="empty-state">
@@ -427,7 +427,11 @@
           Actualizar Datos
         </button>
           <!-- Botón eliminar -->
-        <button v-if="!modoSeleccion && !actualizando"  @click="toggleModoSeleccion" :class="['delete-btn', modoSeleccion ? 'active' : '']">
+        <button v-if="!actualizando && (
+          (tab === 'sensores' && sensores.length > 0) ||
+          (tab === 'panico' && panicos.length > 0) ||
+          (tab === 'todos' && todosCombinados.length > 0)
+        )" @click="toggleModoSeleccion" :class="['delete-btn', modoSeleccion ? 'active' : '']">
           <!-- Icono basura cuando dice Eliminar -->
             <svg v-if="!modoSeleccion" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="3 6 5 6 21 6"/>
