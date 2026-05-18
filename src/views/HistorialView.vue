@@ -765,10 +765,19 @@ const totalPaginasSensores = computed(() => Math.ceil(sensoresOrdenados.value.le
 const totalPaginasPanicos  = computed(() => Math.ceil(panicos.value.length / porPagina))
 const totalPaginasTodos    = computed(() => Math.ceil(todosCombinados.value.length / porPagina))
 
-watch(tab, () => {
+watch(tab, async (nuevoTab) => {
   paginaSensores.value = 1
   paginaPanicos.value  = 1
   paginaTodos.value    = 1
+  try {
+    await fetch(`${API_BASE}/api/config/tab`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tab: nuevoTab })
+    })
+  } catch {
+    console.error('Error al guardar tab')
+  }
 })
 
 //==============Filtros=========
@@ -844,12 +853,16 @@ const handleLogout = async () => {
 onMounted(async () => {
   await fetchData()
   try {
-    const res = await fetch(`${API_BASE}/api/config/modo`)
-    const data = await res.json()
-    modoHistorial.value = data.modo
-    //localStorage.setItem('modoHistorial', data.modo)
+    const [resModo, resTab] = await Promise.all([
+      fetch(`${API_BASE}/api/config/modo`),
+      fetch(`${API_BASE}/api/config/tab`)
+    ])
+    const dataModo = await resModo.json()
+    const dataTab  = await resTab.json()
+    modoHistorial.value = dataModo.modo
+    tab.value = dataTab.tab
   } catch(err) {
-     console.error("ERROR FETCH:", err)
+    console.error("ERROR FETCH:", err)
   }
 })
 
