@@ -125,12 +125,12 @@
                @change="toggleTodos"
                class="check-input"/>
       </th>
-      <th>ID</th><th>Tipo</th><th>Valor</th><th>Alerta</th><th>Fecha</th><th>Detalles</th>
+      <th>No.</th><th>Tipo</th><th>Valor</th><th>Alerta</th><th>Fecha</th><th>Detalles</th>
     </tr>
   </thead>
 
   <tbody>
-    <template v-for="s in sensoresPaginados" :key="s.id">
+    <template v-for="(s, index) in sensoresPaginados" :key="s.id">
       <tr :class="[s.alert ? 'row-alert' : '', seleccionados.has(s.id) ? 'row-selected' : '']">
         <!-- Checkbox individual, solo visible en modo selección -->
          <td v-if="modoSeleccion">
@@ -139,7 +139,7 @@
                   @change="toggleSeleccion(s.id)"
                   class="check-input"/>
           </td>
-        <td class="cell-id">#{{ s.id }}</td>
+        <td class="cell-id">{{ sensoresOrdenados.length - ((paginaSensores - 1) * porPagina + index) }}</td>
         <td><span :class="['type-badge', getTypeClass(s.type)]">{{ s.type }}</span></td>
         <td class="cell-value">{{ s.value }}</td>
         <td><span :class="['status-badge', s.alert ? 'alert' : 'normal']">{{ s.alert ? '🔥 Alerta' : '✓ Normal' }}</span></td>
@@ -227,11 +227,11 @@
         </div>
         <table v-else class="events-table">
           <thead>
-            <tr><th>ID</th><th>Estado</th><th>Notificación</th><th>Fecha</th></tr>
+            <tr><th>No.</th><th>Estado</th><th>Notificación</th><th>Fecha</th></tr>
           </thead>
           <tbody>
-            <tr v-for="p in panicosPaginados" :key="p.id" class="row-panic">
-              <td class="cell-id">#{{ p.id }}</td>
+            <tr v-for="(p, index) in panicosPaginados" :key="p.id" class="row-panic">
+              <td class="cell-id">{{ panicos.length - ((paginaPanicos - 1) * porPagina + index) }}</td>
               <td><span class="status-badge panic">🆘 Pánico Activado</span></td>
               <td><span :class="['status-badge', p.atendido ? 'normal' : 'alert']">{{ p.atendido ? '✓ Cerrada' : '🆘 Activa' }}</span></td>
               <td class="cell-date">{{ formatDate(p.timestamp) }}</td>
@@ -257,7 +257,7 @@
   <table v-else class="events-table">
     <thead>
       <tr>
-        <th>ID</th>
+        <th>No.</th>
         <th>Tipo</th>
         <th>Detalle</th>
         <th>Estado</th>
@@ -267,9 +267,9 @@
         
     </thead>
       <tbody>
-      <template v-for="item in todosPaginados" :key="item._tabla + item.id">
+      <template v-for="(item, index) in todosPaginados" :key="item._tabla + item.id">
         <tr :class="item._tabla === 'panico' ? 'row-panic' : item.alert ? 'row-alert' : ''">
-          <td class="cell-id">#{{ item.id }}</td>
+          <td class="cell-id">{{ todosCombinados.length - ((paginaTodos - 1) * porPagina + index) }}</td>
           <td>
             <span v-if="item._tabla === 'sensor'" :class="['type-badge', getTypeClass(item.type)]">{{ item.type }}</span>
             <span v-else class="type-badge fire">🆘 Pánico</span>
