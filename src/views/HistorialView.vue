@@ -113,6 +113,14 @@
 
       <!-- Tabla de Sensores -->
       <div v-if="tab === 'sensores'" class="table-container">
+          <!-- Loading overlay -->
+        <div v-if="actualizando" class="table-loading">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="2"
+              style="animation: spin 1s linear infinite">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+          </svg>
+          <span>Actualizando...</span>
+        </div>
         <div class="table-header">
           <h3>{{ modoSeleccion ? 'Selecciona para eliminar' : 'Registros de Sensores' }}</h3>
           <span class="table-count">{{ sensores.length }} registros</span>
@@ -224,6 +232,14 @@
 
       <!-- Tabla de Pánico -->
       <div v-if="tab === 'panico'" class="table-container">
+        <!-- Loading overlay -->
+        <div v-if="actualizando" class="table-loading">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="2"
+              style="animation: spin 1s linear infinite">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+          </svg>
+          <span>Actualizando...</span>
+        </div>
         <div class="table-header">
           <h3>Registros de Pánico</h3>
           <span class="table-count">{{ panicos.length }} registros</span>
@@ -274,6 +290,14 @@
 
       <!-- Tabla Todos (combinada) -->
 <div v-if="tab === 'todos'" class="table-container">
+  <!-- Loading overlay -->
+  <div v-if="actualizando" class="table-loading">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="2"
+         style="animation: spin 1s linear infinite">
+      <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+    </svg>
+    <span>Actualizando...</span>
+  </div>
   <div class="table-header">
     <h3>Todos los Registros</h3>
     <span class="table-count">{{ todosCombinados.length }} registros</span>
@@ -390,10 +414,12 @@
   </div>
 </div>
 
-      <!-- Botón refrescar -->
+      <!-- Botón refrescar/Actualizar -->
       <div class="refresh-section">
-        <button v-if="!modoSeleccion" @click="fetchData" class="refresh-btn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button v-if="!modoSeleccion" @click="fetchData" class="refresh-btn" :disabled="actualizando"
+        :style="actualizando ? 'opacity: 0.5; cursor: not-allowed;' : ''">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              :style="actualizando ? 'animation: spin 1s linear infinite' : ''">
             <polyline points="23 4 23 10 17 10"/>
             <polyline points="1 20 1 14 7 14"/>
             <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
@@ -401,7 +427,7 @@
           Actualizar Datos
         </button>
           <!-- Botón eliminar -->
-        <button @click="toggleModoSeleccion" :class="['delete-btn', modoSeleccion ? 'active' : '']">
+        <button v-if="!modoSeleccion && !actualizando"  @click="toggleModoSeleccion" :class="['delete-btn', modoSeleccion ? 'active' : '']">
           <!-- Icono basura cuando dice Eliminar -->
             <svg v-if="!modoSeleccion" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="3 6 5 6 21 6"/>
@@ -472,7 +498,8 @@ const tab = ref('sensores')
 const sensores = ref([])
 
 //------------LOADING Hasta que responda la API----
-const cargando = ref(true)
+const cargando = ref(true) // vista total
+const actualizando = ref(false) // solo tabla
 
 //------------SELECCIONAR ELIMINAR tablA SENSORES--------
 // Seleccionar para eliminar en historial
@@ -825,6 +852,7 @@ const formatDate = (timestamp) => {
 }
 
 const fetchData = async () => {
+  actualizando.value = true
   try {
     const [s, p, ae] = await Promise.all([
       fetch(`${API_BASE}/api/sensor`).then(r => r.json()),
@@ -836,6 +864,9 @@ const fetchData = async () => {
     alertasEventos.value = Array.isArray(ae) ? ae : []
   } catch (err) {
     console.error('fetchData error:', err)  
+  } finally {
+    await new Promise(r => setTimeout(r, 1000))
+    actualizando.value = false
   }
 }
 
@@ -1051,13 +1082,29 @@ onUnmounted(() => {
 
 /* Table Container */
 .table-container {
+  position: relative;
   background: #1A1F2E;
   border: 1px solid #262D3D;
   border-radius: 20px;
   padding: 20px;
   margin-bottom: 16px;
 }
-
+.table-loading {
+  position: absolute;
+  inset: 0;
+  background: rgba(26, 31, 46, 0.85);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  z-index: 10;
+  color: #F97316;
+  font-size: 14px;
+  font-weight: 600;
+  backdrop-filter: blur(2px);
+}
 .table-header {
   display: flex;
   justify-content: space-between;
