@@ -371,11 +371,28 @@
         </button>
           <!-- Confirmar eliminación, solo visible si hay seleccionados -->
         <button v-if="modoSeleccion && seleccionados.size > 0"
-                @click="eliminarSeleccionados"
+                @click="mostrarConfirm = true"
                 class="confirm-delete-btn">
           Eliminar {{ seleccionados.size }} registro{{ seleccionados.size > 1 ? 's' : '' }}
         </button>
       </div>
+
+        <!-- Modal de confirmación -->
+      <div v-if="mostrarConfirm" class="modal-overlay" @click.self="mostrarConfirm = false">
+        <div class="modal-box">
+          <div class="modal-icon">🗑️</div>
+          <h3 class="modal-title">¿Eliminar registros?</h3>
+          <p class="modal-msg">
+            Estás a punto de eliminar <strong>{{ seleccionados.size }} registro{{ seleccionados.size > 1 ? 's' : '' }}</strong>.<br>
+            Una vez confirmado, no se podrán recuperar.
+          </p>
+          <div class="modal-actions">
+            <button class="modal-cancel" @click="mostrarConfirm = false">Cancelar</button>
+            <button class="modal-confirm" @click="confirmarEliminacion">Sí, eliminar</button>
+          </div>
+        </div>
+      </div>
+
     </main>
   </div>
 </template>
@@ -438,6 +455,13 @@ const eliminarSeleccionados = async () => {
   } catch (err) {
     console.error('Error al eliminar:', err)
   }
+}
+
+const mostrarConfirm = ref(false)
+
+const confirmarEliminacion = async () => {
+  mostrarConfirm.value = false
+  await eliminarSeleccionados()
 }
 //----------------------------------------------------------
 
@@ -1214,7 +1238,89 @@ onUnmounted(() => {
 
 .confirm-delete-btn:hover { background: #DC2626; }
 
+
+
 .row-selected td { background: rgba(239,68,68,0.1) !important; }
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.modal-box {
+  background: #1A1F2E;
+  border: 1px solid #262D3D;
+  border-radius: 20px;
+  padding: 32px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-icon { font-size: 40px; }
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #F8FAFC;
+}
+
+.modal-msg {
+  font-size: 13px;
+  color: #94A3B8;
+  line-height: 1.6;
+}
+
+.modal-msg strong {
+  color: #F8FAFC;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.modal-cancel {
+  padding: 10px 24px;
+  background: #111827;
+  border: 1px solid #262D3D;
+  border-radius: 12px;
+  color: #94A3B8;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-cancel:hover {
+  background: #1E2435;
+  color: #F8FAFC;
+  border-color: #323B4E;
+}
+
+.modal-confirm {
+  padding: 10px 24px;
+  background: #EF4444;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-confirm:hover { background: #DC2626; }
 
 .check-input {
   width: 16px;
