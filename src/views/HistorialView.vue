@@ -225,12 +225,32 @@
           <p>Sin registros de pánico</p>
           <span class="empty-sub">No se han activado alertas de emergencia</span>
         </div>
+       
         <table v-else class="events-table">
           <thead>
-            <tr><th>No.</th><th>Estado</th><th>Notificación</th><th>Fecha</th></tr>
+            <tr>
+              <th v-if="modoSeleccion">
+                <input type="checkbox"
+                      :checked="seleccionadosPanico.size === panicosPaginados.length"
+                      @change="toggleTodosPanico"
+                      class="check-input"/>
+              </th>
+              <th>No.</th>
+              <th>Estado</th>
+              <th>Notificación</th>
+              <th>Fecha</th>
+            </tr>
           </thead>
+
           <tbody>
-            <tr v-for="(p, index) in panicosPaginados" :key="p.id" class="row-panic">
+              <tr v-for="(p, index) in panicosPaginados" :key="p.id"
+              :class="['row-panic', seleccionadosPanico.has(p.id) ? 'row-selected' : '']">
+            <td v-if="modoSeleccion">
+              <input type="checkbox"
+                    :checked="seleccionadosPanico.has(p.id)"
+                    @change="toggleSeleccionPanico(p.id)"
+                    class="check-input"/>
+            </td>
               <td class="cell-id">{{ panicos.length - ((paginaPanicos - 1) * porPagina + index) }}</td>
               <td><span class="status-badge panic">🆘 Pánico Activado</span></td>
               <td><span :class="['status-badge', p.atendido ? 'normal' : 'alert']">{{ p.atendido ? '✓ Cerrada' : '🆘 Activa' }}</span></td>
@@ -257,6 +277,12 @@
   <table v-else class="events-table">
     <thead>
       <tr>
+        <th v-if="modoSeleccion">
+        <input type="checkbox"
+              :checked="seleccionadosTodos.size === todosPaginados.length"
+              @change="toggleTodosTodos"
+              class="check-input"/>
+        </th>
         <th>No.</th>
         <th>Tipo</th>
         <th>Detalle</th>
@@ -268,7 +294,14 @@
     </thead>
       <tbody>
       <template v-for="(item, index) in todosPaginados" :key="item._tabla + item.id">
-        <tr :class="item._tabla === 'panico' ? 'row-panic' : item.alert ? 'row-alert' : ''">
+        <tr :class="[item._tabla === 'panico' ? 'row-panic' : item.alert ? 'row-alert' : '',
+               seleccionadosTodos.has(item._tabla + item.id) ? 'row-selected' : '']">
+          <td v-if="modoSeleccion">
+            <input type="checkbox"
+                  :checked="seleccionadosTodos.has(item._tabla + item.id)"
+                  @change="toggleSeleccionTodos(item)"
+                  class="check-input"/>
+          </td>
           <td class="cell-id">{{ todosCombinados.length - ((paginaTodos - 1) * porPagina + index) }}</td>
           <td>
             <span v-if="item._tabla === 'sensor'" :class="['type-badge', getTypeClass(item.type)]">{{ item.type }}</span>
@@ -376,11 +409,19 @@
           {{ modoSeleccion ? 'Cancelar' : 'Eliminar' }}
       </button>
           <!-- Confirmar eliminación, solo visible si hay seleccionados -->
-        <button v-if="modoSeleccion && seleccionados.size > 0"
-                @click="mostrarConfirm = true"
-                class="confirm-delete-btn">
-          Eliminar {{ seleccionados.size }} registro{{ seleccionados.size > 1 ? 's' : '' }}
-        </button>
+      <button v-if="modoSeleccion && (seleccionados.size > 0 || seleccionadosPanico.size > 0 || seleccionadosTodos.size > 0)"
+              @click="mostrarConfirm = true"
+              class="confirm-delete-btn">
+        Eliminar {{ 
+          tab === 'sensores' ? seleccionados.size : 
+          tab === 'panico' ? seleccionadosPanico.size : 
+          seleccionadosTodos.size 
+        }} registro{{ (
+          tab === 'sensores' ? seleccionados.size : 
+          tab === 'panico' ? seleccionadosPanico.size : 
+          seleccionadosTodos.size
+        ) > 1 ? 's' : '' }}
+      </button>
       </div>
 
         <!-- Modal de confirmación -->
@@ -388,10 +429,18 @@
         <div class="modal-box">
           <div class="modal-icon">🗑️</div>
           <h3 class="modal-title">¿Eliminar registros?</h3>
-          <p class="modal-msg">
-            Estás a punto de eliminar <strong>{{ seleccionados.size }} registro{{ seleccionados.size > 1 ? 's' : '' }}</strong>.<br>
-            Una vez confirmado, no se podrán recuperar.
-          </p>
+        <p class="modal-msg">
+          Estás a punto de eliminar 
+          <strong>
+            {{ tab === 'sensores' ? seleccionados.size : 
+              tab === 'panico' ? seleccionadosPanico.size : 
+              seleccionadosTodos.size }} registro{{ (
+              tab === 'sensores' ? seleccionados.size : 
+              tab === 'panico' ? seleccionadosPanico.size : 
+              seleccionadosTodos.size) > 1 ? 's' : '' }}
+          </strong>.<br>
+          Una vez confirmado, no se podrán recuperar.
+        </p>
           <div class="modal-actions">
             <button class="modal-cancel" @click="mostrarConfirm = false">Cancelar</button>
             <button class="modal-confirm" @click="confirmarEliminacion">Sí, eliminar</button>
@@ -414,7 +463,7 @@ const API_BASE = import.meta.env.VITE_API_BASE
 
 const tab = ref('sensores')
 const sensores = ref([])
-//----------------------------------------------------------
+//------------SELECCIONAR ELIMINAR tablA SENSORES--------
 // Seleccionar para eliminar en historial
 const modoSeleccion = ref(false) //control si esta activo el modo seleccion
 const seleccionados = ref(new Set()) // evitar id duplicados
@@ -422,8 +471,11 @@ const seleccionados = ref(new Set()) // evitar id duplicados
 // Activar/desactivar modo selección
 const toggleModoSeleccion = () => {
   modoSeleccion.value = !modoSeleccion.value
-  // Limpiar selección al salir del modo
-  if (!modoSeleccion.value) seleccionados.value = new Set()
+  if (!modoSeleccion.value) {
+    seleccionados.value = new Set()
+    seleccionadosPanico.value = new Set()
+    seleccionadosTodos.value = new Set()
+  }
 }
 // Seleccionar/deseleccionar un registro individual
 const toggleSeleccion = (id) => {
@@ -467,9 +519,95 @@ const mostrarConfirm = ref(false)
 
 const confirmarEliminacion = async () => {
   mostrarConfirm.value = false
-  await eliminarSeleccionados()
+  if (tab.value === 'sensores') await eliminarSeleccionados()
+  else if (tab.value === 'panico') await eliminarSeleccionadosPanico()
+  else if (tab.value === 'todos') await eliminarSeleccionadosTodos()
 }
-//----------------------------------------------------------
+//----------------------------------------------
+//------------SELECCIONAR ELIMINAR TABLA PANICO--------
+const seleccionadosPanico = ref(new Set())
+
+const toggleSeleccionPanico = (id) => {
+  const s = new Set(seleccionadosPanico.value)
+  if (s.has(id)) s.delete(id)
+  else s.add(id)
+  seleccionadosPanico.value = s
+}
+
+const toggleTodosPanico = () => {
+  if (seleccionadosPanico.value.size === panicosPaginados.value.length) {
+    seleccionadosPanico.value = new Set()
+  } else {
+    seleccionadosPanico.value = new Set(panicosPaginados.value.map(p => p.id))
+  }
+}
+
+const eliminarSeleccionadosPanico = async () => {
+  if (seleccionadosPanico.value.size === 0) return
+  const ids = Array.from(seleccionadosPanico.value)
+  try {
+    await fetch(`${API_BASE}/api/panic/eliminar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids })
+    })
+    await fetchData()
+    modoSeleccion.value = false 
+    seleccionadosPanico.value = new Set()
+  } catch (err) {
+    console.error('Error al eliminar pánico:', err)
+  }
+}
+//------------SELECCIONAR ELIMINAR TABLA TODOS--------
+const seleccionadosTodos = ref(new Set())
+
+const toggleSeleccionTodos = (item) => {
+  const key = item._tabla + item.id
+  const s = new Set(seleccionadosTodos.value)
+  if (s.has(key)) s.delete(key)
+  else s.add(key)
+  seleccionadosTodos.value = s
+}
+
+const toggleTodosTodos = () => {
+  if (seleccionadosTodos.value.size === todosPaginados.value.length) {
+    seleccionadosTodos.value = new Set()
+  } else {
+    seleccionadosTodos.value = new Set(todosPaginados.value.map(i => i._tabla + i.id))
+  }
+}
+
+const eliminarSeleccionadosTodos = async () => {
+  if (seleccionadosTodos.value.size === 0) return
+  const idsSensores = todosCombinados.value
+    .filter(i => seleccionadosTodos.value.has(i._tabla + i.id) && i._tabla === 'sensor')
+    .map(i => i.id)
+  const idsPanico = todosCombinados.value
+    .filter(i => seleccionadosTodos.value.has(i._tabla + i.id) && i._tabla === 'panico')
+    .map(i => i.id)
+  try {
+    const promesas = []
+    if (idsSensores.length > 0)
+      promesas.push(fetch(`${API_BASE}/api/sensor/eliminar`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: idsSensores })
+      }))
+    if (idsPanico.length > 0)
+      promesas.push(fetch(`${API_BASE}/api/panic/eliminar`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: idsPanico })
+      }))
+    await Promise.all(promesas)
+    await fetchData()
+    modoSeleccion.value = false
+    seleccionadosTodos.value = new Set()
+  } catch (err) {
+    console.error('Error al eliminar todos:', err)
+  }
+}
+//---------------------------------------------------
+
+
 
 // Convierte timestamp de SQLite a milisegundos UTC
 // SQLite no incluye 'Z', JS necesita 'Z' para interpretar como UTC
