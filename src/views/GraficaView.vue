@@ -126,7 +126,7 @@
           </div>
 
           <!-- Gráfica Temperatura -->
-          <div ref="gasCardRef" class="chart-card">
+          <div ref="tempCardRef" class="chart-card">
             <div class="chart-header">
                   <button @click="descargarGrafica('temperatura')" class="download-btn">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
