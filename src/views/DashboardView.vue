@@ -763,10 +763,16 @@ const fetchStatus = async () => {
   try {
     const [res, ae] = await Promise.all([
       fetch(`${API_BASE}/api/sensor/latest`),
-      fetch(`${API_BASE}/api/alertas/eventos`)
+      fetch(`${API_BASE}/api/alertas/eventos`),
+      fetch(`${API_BASE}/api/sensor/live`)
     ])
     const data = await res.json()
     const eventos = await ae.json()
+    const liveData = await live.json()
+    // Usar live para gas y temperatura si están disponibles
+    if (liveData.gas !== undefined) data.gas_level = liveData.gas
+    if (liveData.temperatura !== undefined) data.temperature = liveData.temperatura
+    
     status.value = data
     connected.value = true
 
