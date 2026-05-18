@@ -623,7 +623,7 @@ const todosPaginados = computed(() => {
   return todosCombinados.value.slice(inicio, inicio + porPagina)
 })
 
-const totalPaginasSensores = computed(() => Math.ceil(sensores.value.length / porPagina))
+const totalPaginasSensores = computed(() => Math.ceil(sensoresOrdenados.value.length / porPagina))
 const totalPaginasPanicos  = computed(() => Math.ceil(panicos.value.length / porPagina))
 const totalPaginasTodos    = computed(() => Math.ceil(todosCombinados.value.length / porPagina))
 
