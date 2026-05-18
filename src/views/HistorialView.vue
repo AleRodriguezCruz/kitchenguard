@@ -42,6 +42,13 @@
 
     <!-- Contenido Principal -->
     <main class="main-content">
+      <div v-if="cargando" class="loading-state">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="2">
+          <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+        </svg>
+        <span>Cargando historial...</span>
+      </div>
+      <template v-else>
       <!-- Header -->
       <div class="page-header">
         <div class="page-title-group">
@@ -447,7 +454,7 @@
           </div>
         </div>
       </div>
-
+      </template>
     </main>
   </div>
 </template>
@@ -463,6 +470,10 @@ const API_BASE = import.meta.env.VITE_API_BASE
 
 const tab = ref('sensores')
 const sensores = ref([])
+
+//------------LOADING Hasta que responda la API----
+const cargando = ref(true)
+
 //------------SELECCIONAR ELIMINAR tablA SENSORES--------
 // Seleccionar para eliminar en historial
 const modoSeleccion = ref(false) //control si esta activo el modo seleccion
@@ -851,7 +862,6 @@ const handleLogout = async () => {
 }
 
 onMounted(async () => {
-  await fetchData()
   try {
     const [resModo, resTab] = await Promise.all([
       fetch(`${API_BASE}/api/config/modo`),
@@ -863,6 +873,9 @@ onMounted(async () => {
     tab.value = dataTab.tab
   } catch(err) {
     console.error("ERROR FETCH:", err)
+  } finally {
+    await fetchData()
+    cargando.value = false
   }
 })
 
@@ -1485,7 +1498,25 @@ onUnmounted(() => {
   cursor: pointer;
   accent-color: #F97316;
 }
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  height: 300px;
+  color: #475569;
+  font-size: 14px;
+}
 
+.loading-state svg {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
 /* Responsive */
 @media (max-width: 768px) {
   .main-content { padding: 16px; }
