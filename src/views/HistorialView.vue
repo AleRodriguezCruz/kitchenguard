@@ -107,7 +107,7 @@
       <!-- Tabla de Sensores -->
       <div v-if="tab === 'sensores'" class="table-container">
         <div class="table-header">
-          <h3>Registros de Sensores</h3>
+          <h3>{{ modoSeleccion ? 'Selecciona para eliminar' : 'Registros de Sensores' }}</h3>
           <span class="table-count">{{ sensores.length }} registros</span>
         </div>
         
@@ -352,7 +352,7 @@
 
       <!-- Botón refrescar -->
       <div class="refresh-section">
-        <button @click="fetchData" class="refresh-btn">
+        <button v-if="!modoSeleccion" @click="fetchData" class="refresh-btn">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="23 4 23 10 17 10"/>
             <polyline points="1 20 1 14 7 14"/>
