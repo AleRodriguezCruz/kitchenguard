@@ -32,6 +32,7 @@
         <router-link to="/dashboard" class="nav-item">Inicio</router-link>
         <router-link to="/timers" class="nav-item">Timers</router-link>
         <router-link to="/historial" class="nav-item nav-active">Historial</router-link>
+        <router-link to="/graficas" class="nav-item" active-class="nav-active">Gráficas</router-link>
       </div>
 
       <!-- SALIR -->
