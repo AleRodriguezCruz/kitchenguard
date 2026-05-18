@@ -85,8 +85,17 @@
 
         <template v-else>
           <!-- Gráfica Gas -->
-          <div class="chart-card">
+          <div ref="gasCardRef" class="chart-card">
             <div class="chart-header">
+
+            <button @click="descargarGrafica('gas')" class="download-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Descargar
+            </button>
               <div class="chart-title-group">
                 <span class="sensor-dot gas"></span>
                 <h3>Gas LP — {{ fechaFormateada }}</h3>
@@ -108,8 +117,16 @@
           </div>
 
           <!-- Gráfica Temperatura -->
-          <div class="chart-card">
+          <div ref="gasCardRef" class="chart-card">
             <div class="chart-header">
+                  <button @click="descargarGrafica('temperatura')" class="download-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Descargar
+                </button>
               <div class="chart-title-group">
                 <span class="sensor-dot temp"></span>
                 <h3>Temperatura — {{ fechaFormateada }}</h3>
@@ -120,7 +137,7 @@
                   <span class="stat-value temp">{{ promedioTemp }}°C</span>
                 </div>
                 <div class="stat">
-                  <span class="stat-label">Pico</span>
+                  <span class="stat-label">Máx.</span>
                   <span class="stat-value danger">{{ picoTemp }}°C</span>
                 </div>
               </div>
@@ -140,6 +157,7 @@ import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
 import Chart from 'chart.js/auto'
+import html2canvas from 'html2canvas'
 
 const router = useRouter()
 const { logout } = useAuth()
@@ -243,6 +261,30 @@ const crearGrafica = (canvas, data, color, label, unidad, yMax) => {
     }
   })
 }
+
+// Descargar grafica
+const gasCardRef  = ref(null)
+const tempCardRef = ref(null)
+
+const descargarGrafica = async (tipo) => {
+  const card = tipo === 'gas' ? gasCardRef.value : tempCardRef.value
+  if (!card) return
+
+  // Ocultar botones de descarga
+  const botones = card.querySelectorAll('.download-btn')
+  botones.forEach(b => b.style.visibility = 'hidden')
+
+  const canvas = await html2canvas(card, {
+    backgroundColor: '#1A1F2E',
+    scale: 2  // mejor resolución
+  })
+
+  const link = document.createElement('a')
+  link.download = `kitchenguard_${tipo}_${fechaSeleccionada.value}.png`
+  link.href = canvas.toDataURL('image/png')
+  link.click()
+}
+
 
 const fetchDatos = async () => {
   cargando.value = true
@@ -496,6 +538,26 @@ onUnmounted(() => {
 .aviso-link:hover { text-decoration: underline; }
 
 .chart-container { height: 280px; position: relative; }
+
+.download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: #111827;
+  border: 1px solid #262D3D;
+  border-radius: 10px;
+  color: #94A3B8;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.download-btn:hover {
+  color: #F8FAFC;
+  border-color: #323B4E;
+  background: #1E2435;
+}
 
 @keyframes spin {
   from { transform: rotate(0deg); }
