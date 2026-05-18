@@ -52,6 +52,15 @@
         <div class="fecha-selector">
           <label class="fecha-label">📅 Fecha:</label>
           <input type="date" v-model="fechaSeleccionada" class="fecha-input" :max="hoy" @change="fetchDatos"/>
+          <button @click="fetchDatos" class="refresh-btn" :disabled="cargando"
+          :style="cargando ? 'opacity: 0.5; cursor: not-allowed;' : ''">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                :style="cargando ? 'animation: spin 1s linear infinite' : ''">
+            <polyline points="23 4 23 10 17 10"/>
+            <polyline points="1 20 1 14 7 14"/>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+            </svg>
+        </button>
         </div>
       </div>
         <!-- Aviso de modo/intervalo -->
@@ -554,6 +563,26 @@ onUnmounted(() => {
 }
 
 .download-btn:hover {
+  color: #F8FAFC;
+  border-color: #323B4E;
+  background: #1E2435;
+}
+
+.refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #1A1F2E;
+  border: 1px solid #262D3D;
+  border-radius: 12px;
+  color: #94A3B8;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.refresh-btn:hover {
   color: #F8FAFC;
   border-color: #323B4E;
   background: #1E2435;
