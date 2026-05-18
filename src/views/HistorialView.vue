@@ -1040,8 +1040,10 @@ onUnmounted(() => {
   transition: all 0.2s;
 }
 
-.tab:hover { color: #94A3B8; }
-
+.tab:hover { 
+  color: #F8FAFC;
+  background: rgba(255,255,255,0.08);
+}
 .tab.active {
   background: #F97316;
   color: white;
@@ -1278,6 +1280,10 @@ onUnmounted(() => {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
+}
+.modo-btn:hover {
+  background: rgba(255,255,255,0.08);
+  color: #F8FAFC;
 }
 
 .modo-btn.active {
