@@ -194,7 +194,7 @@ const buildDataset = (data, hora) => {
   return row ? parseFloat(row.promedio.toFixed(2)) : null
 }
 
-const crearGrafica = (canvas, data, color, label, unidad) => {
+const crearGrafica = (canvas, data, color, label, unidad, yMax) => {
   if (!canvas) return null
 
   const labels = horasCompletas.map(h => `${h}:00`)
@@ -236,7 +236,8 @@ const crearGrafica = (canvas, data, color, label, unidad) => {
         y: {
           ticks: { color: '#475569', callback: (v) => `${v}${unidad}` },
           grid:  { color: 'rgba(255,255,255,0.05)' },
-          beginAtZero: true
+          beginAtZero: true,
+          max: yMax
         }
       }
     }
@@ -274,8 +275,8 @@ const fetchDatos = async () => {
     cargando.value = false
     if (!sinDatos.value) {
       await nextTick()
-      gasChart  = crearGrafica(gasCanvas.value,  gasData.value,  '#F59E0B', 'Gas LP',       '%')
-      tempChart = crearGrafica(tempCanvas.value, tempData.value, '#F97316', 'Temperatura',  '°C')
+      gasChart  = crearGrafica(gasCanvas.value,  gasData.value,  '#F59E0B', 'Gas LP',       '%', 100)
+      tempChart = crearGrafica(tempCanvas.value, tempData.value, '#F97316', 'Temperatura',  '°C', 50)
     }
   }
 }
