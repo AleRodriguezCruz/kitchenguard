@@ -793,8 +793,6 @@ watch(tab, async (nuevoTab) => {
 
 //==============Filtros=========
 const eventosFiltrados = computed(() => {
-  if (tab.value === 'sensores') return sensoresOrdenados.value
-  if (tab.value === 'panico') return panicos.value
   return todosCombinados.value
 })
 
