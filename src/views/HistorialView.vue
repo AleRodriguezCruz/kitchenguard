@@ -114,15 +114,31 @@
         <div v-if="sensores.length === 0" class="empty-state">
     <p>Sin registros de sensores</p>
         </div>
-        <table v-else class="events-table">
+
+  <table v-else class="events-table">
   <thead>
     <tr>
+            <!-- Checkbox seleccionar todos, solo visible en modo selección -->
+      <th v-if="modoSeleccion">
+        <input type="checkbox"
+               :checked="seleccionados.size === sensoresPaginados.length"
+               @change="toggleTodos"
+               class="check-input"/>
+      </th>
       <th>ID</th><th>Tipo</th><th>Valor</th><th>Alerta</th><th>Fecha</th><th>Detalles</th>
     </tr>
   </thead>
+
   <tbody>
     <template v-for="s in sensoresPaginados" :key="s.id">
-      <tr :class="s.alert ? 'row-alert' : ''">
+      <tr :class="[s.alert ? 'row-alert' : '', seleccionados.has(s.id) ? 'row-selected' : '']">
+        <!-- Checkbox individual, solo visible en modo selección -->
+         <td v-if="modoSeleccion">
+            <input type="checkbox"
+                  :checked="seleccionados.has(s.id)"
+                  @change="toggleSeleccion(s.id)"
+                  class="check-input"/>
+          </td>
         <td class="cell-id">#{{ s.id }}</td>
         <td><span :class="['type-badge', getTypeClass(s.type)]">{{ s.type }}</span></td>
         <td class="cell-value">{{ s.value }}</td>
@@ -133,7 +149,7 @@
         <button v-if="s.alert" class="detail-btn" @click="toggleDetalle(s.id)">
           {{ eventoExpandido === s.id ? 'Cerrar' : 'Ver detalles' }}
         </button>
-        <span v-else class="cell-id">—</span>
+        <span v-else-if="!modoSeleccion" class="cell-id">—</span>
       </td>
       </tr>
       <tr v-if="eventoExpandido === s.id" class="detail-row">
@@ -344,6 +360,21 @@
           </svg>
           Actualizar Datos
         </button>
+          <!-- Botón eliminar -->
+        <button @click="toggleModoSeleccion" :class="['delete-btn', modoSeleccion ? 'active' : '']">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14H6L5 6"/>
+            <path d="M10 11v6M14 11v6"/>
+          </svg>
+          {{ modoSeleccion ? 'Cancelar' : 'Eliminar' }}
+        </button>
+          <!-- Confirmar eliminación, solo visible si hay seleccionados -->
+        <button v-if="modoSeleccion && seleccionados.size > 0"
+                @click="eliminarSeleccionados"
+                class="confirm-delete-btn">
+          Eliminar {{ seleccionados.size }} registro{{ seleccionados.size > 1 ? 's' : '' }}
+        </button>
       </div>
     </main>
   </div>
@@ -360,6 +391,55 @@ const API_BASE = import.meta.env.VITE_API_BASE
 
 const tab = ref('sensores')
 const sensores = ref([])
+//----------------------------------------------------------
+// Seleccionar para eliminar en historial
+const modoSeleccion = ref(false) //control si esta activo el modo seleccion
+const seleccionados = ref(new Set()) // evitar id duplicados
+
+// Activar/desactivar modo selección
+const toggleModoSeleccion = () => {
+  modoSeleccion.value = !modoSeleccion.value
+  // Limpiar selección al salir del modo
+  if (!modoSeleccion.value) seleccionados.value = new Set()
+}
+// Seleccionar/deseleccionar un registro individual
+const toggleSeleccion = (id) => {
+  const s = new Set(seleccionados.value)
+  if (s.has(id)) {
+    s.delete(id)
+  } else {
+    s.add(id)
+  }
+  seleccionados.value = s
+}
+// Seleccionar o deseleccionar todos los de la página actual
+const toggleTodos = () => {
+  if (seleccionados.value.size === sensoresPaginados.value.length) {
+    seleccionados.value = new Set()
+  } else {
+    seleccionados.value = new Set(sensoresPaginados.value.map(s => s.id))
+  }
+}
+// Eliminar los registros seleccionados
+const eliminarSeleccionados = async () => {
+  if (seleccionados.value.size === 0) return
+  
+  const ids = Array.from(seleccionados.value)
+  try {
+    await fetch(`${API_BASE}/api/sensor/eliminar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids })
+    })
+    // Refrescar datos y salir del modo selección
+    await fetchData()
+    modoSeleccion.value = false
+    seleccionados.value = new Set()
+  } catch (err) {
+    console.error('Error al eliminar:', err)
+  }
+}
+//----------------------------------------------------------
 
 // Convierte timestamp de SQLite a milisegundos UTC
 // SQLite no incluye 'Z', JS necesita 'Z' para interpretar como UTC
@@ -599,7 +679,7 @@ onMounted(async () => {
     const res = await fetch(`${API_BASE}/api/config/modo`)
     const data = await res.json()
     modoHistorial.value = data.modo
-    localStorage.setItem('modoHistorial', data.modo)
+    //localStorage.setItem('modoHistorial', data.modo)
   } catch(err) {
      console.error("ERROR FETCH:", err)
   }
@@ -1077,6 +1157,70 @@ onUnmounted(() => {
   font-size: 18px;
   padding: 0 4px;
   user-select: none;
+}
+
+.refresh-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.delete-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.25);
+  border-radius: 12px;
+  color: #EF4444;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.delete-btn.active {
+  background: #1A1F2E;
+  border: 1px solid #262D3D;
+  color: #94A3B8;
+}
+
+.delete-btn.active:hover {
+  color: #F8FAFC;
+  border-color: #323B4E;
+  background: #1E2435;
+}
+.delete-btn:not(.active):hover { 
+  background: rgba(239,68,68,0.15);
+  color: #F8FAFC;
+}
+.confirm-delete-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #EF4444;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.confirm-delete-btn:hover { background: #DC2626; }
+
+.row-selected td { background: rgba(239,68,68,0.1) !important; }
+
+.check-input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #F97316;
 }
 
 /* Responsive */
