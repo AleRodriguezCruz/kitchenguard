@@ -1,43 +1,8 @@
 <template>
   <div class="dashboard">
     <!-- Navbar -->
-    <nav class="navbar">
-      <div class="nav-brand">
-        <router-link to="/dashboard" class="brand-logo-link">
-          <svg width="160" height="42" viewBox="0 0 240 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="logoGradGraf" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#F97316"/>
-                <stop offset="100%" stop-color="#EA580C"/>
-              </linearGradient>
-            </defs>
-            <circle cx="30" cy="30" r="23" fill="#1A1F2E" stroke="#323B4E" stroke-width="1"/>
-            <circle cx="30" cy="30" r="20" fill="none" stroke="url(#logoGradGraf)" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.6">
-              <animateTransform attributeName="transform" type="rotate" from="0 30 30" to="360 30 30" dur="15s" repeatCount="indefinite"/>
-            </circle>
-            <path d="M30 14 C38 14 46 22 46 32 C46 42 38 48 30 49 C22 48 14 42 14 32 C14 22 22 14 30 14Z" fill="url(#logoGradGraf)"/>
-            <ellipse cx="24" cy="20" rx="3" ry="5" fill="rgba(255,255,255,0.15)" transform="rotate(-20, 24, 20)"/>
-            <path d="M30 15 C33 8 38 5 42 8 C38 10 34 12 30 15Z" fill="#166534"/>
-            <text x="68" y="28" fill="#F8FAFC" font-weight="700" font-size="18" letter-spacing="1" font-family="'Segoe UI', Arial, sans-serif">KITCHEN</text>
-            <text x="68" y="46" fill="#F97316" font-weight="800" font-size="14" letter-spacing="3.5" font-family="'Segoe UI', Arial, sans-serif">GUARD</text>
-            <line x1="64" y1="14" x2="64" y2="50" stroke="#323B4E" stroke-width="1"/>
-            <circle cx="228" cy="30" r="4" fill="#10B981" opacity="0.9"/>
-          </svg>
-        </router-link>
-      </div>
-
-      <div class="nav-center">
-        <router-link to="/dashboard" class="nav-item">Inicio</router-link>
-        <router-link to="/timers" class="nav-item">Timers</router-link>
-        <router-link to="/historial" class="nav-item">Historial</router-link>
-        <router-link to="/graficas" class="nav-item nav-active">Gráficas</router-link>
-      </div>
-
-      <div class="nav-right">
-        <button @click="handleLogout" class="logout-btn">Salir</button>
-      </div>
-    </nav>
-
+    <NavBar :connected="connected" />
+  
     <main class="main-content">
       <!-- Header -->
       <div class="page-header">
@@ -167,6 +132,7 @@ import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
 import Chart from 'chart.js/auto'
 import html2canvas from 'html2canvas'
+import NavBar from '../components/NavBar.vue'
 
 const router = useRouter()
 const { logout } = useAuth()
@@ -183,12 +149,14 @@ const gasData  = ref([])
 const tempData = ref([])
 
 const modoActual = ref('')
+const connected = ref(false)
 
-const hoy = new Date().toISOString().split('T')[0]
+const hoy = new Date().toLocaleDateString('sv-SE')
 const fechaSeleccionada = ref(hoy)
 
 const fechaFormateada = computed(() => {
-  return new Date(fechaSeleccionada.value + 'T12:00:00').toLocaleDateString('es-MX', {
+  const [year, month, day] = fechaSeleccionada.value.split('-')
+  return new Date(year, month - 1, day).toLocaleDateString('es-MX', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
   })
 })
@@ -306,8 +274,10 @@ const fetchDatos = async () => {
     const [resModo, resGas, resTemp] = await Promise.all([
       fetch(`${API_BASE}/api/config/modo`),
       fetch(`${API_BASE}/api/sensor/histograma?type=gas&fecha=${fechaSeleccionada.value}`),
-      fetch(`${API_BASE}/api/sensor/histograma?type=temperatura&fecha=${fechaSeleccionada.value}`)
+      fetch(`${API_BASE}/api/sensor/histograma?type=temperatura&fecha=${fechaSeleccionada.value}`),
+
     ])
+    connected.value = true
 
     const dataModo = await resModo.json()
     modoActual.value = dataModo.modo
@@ -318,10 +288,12 @@ const fetchDatos = async () => {
     gasData.value  = dataGas.lecturas  || []
     tempData.value = dataTemp.lecturas || []
 
+
     sinDatos.value = gasData.value.length === 0 && tempData.value.length === 0
   } catch (err) {
     console.error('Error fetchDatos:', err)
     sinDatos.value = true
+    connected.value = false
   } finally {
     cargando.value = false
     if (!sinDatos.value) {
@@ -347,58 +319,16 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-* { margin: 0; padding: 0; box-sizing: border-box; }
 
 .dashboard {
   min-height: 100vh;
   background: #0A0D14;
   color: #F8FAFC;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .navbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-  height: 64px;
-  background: rgba(17, 24, 39, 0.95);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid #262D3D;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  background: rgba(17, 24, 39, 0.95);  
 }
-
-.nav-brand { display: flex; align-items: center; }
-.brand-logo-link { text-decoration: none; display: flex; align-items: center; transition: opacity 0.2s; }
-.brand-logo-link:hover { opacity: 0.8; }
-.nav-center { display: flex; align-items: center; gap: 4px; }
-
-.nav-item {
-  padding: 8px 16px;
-  border-radius: 10px;
-  color: #94A3B8;
-  text-decoration: none;
-  font-size: 13px;
-  font-weight: 500;
-  transition: all 0.2s;
-}
-.nav-item:hover { color: #F8FAFC; background: rgba(255,255,255,0.08); }
-.nav-active { color: #F97316 !important; background: rgba(249,115,22,0.1); }
-.nav-right { display: flex; align-items: center; }
-
-.logout-btn {
-  padding: 8px 16px;
-  background: rgba(239,68,68,0.08);
-  border: 1px solid rgba(239,68,68,0.25);
-  border-radius: 10px;
-  color: #EF4444;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.logout-btn:hover { background: rgba(239,68,68,0.15); }
 
 .main-content {
   padding: 24px;

@@ -1,81 +1,7 @@
 <template>
   <div class="dashboard">
-    <!-- Navbar Profesional Mejorado -->
-    <nav class="navbar">
-  <!-- LOGO UNICO -->
-  <div class="nav-brand">
-    <router-link to="/dashboard" class="brand-logo-link">
-      <svg width="160" height="42" viewBox="0 0 240 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="logoGradWeb" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#F97316"/>
-            <stop offset="100%" stop-color="#EA580C"/>
-          </linearGradient>
-        </defs>
-        <circle cx="30" cy="30" r="23" fill="#1A1F2E" stroke="#323B4E" stroke-width="1"/>
-        <circle cx="30" cy="30" r="20" fill="none" stroke="url(#logoGradWeb)" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.6">
-          <animateTransform attributeName="transform" type="rotate" from="0 30 30" to="360 30 30" dur="15s" repeatCount="indefinite"/>
-        </circle>
-        <path d="M30 14 C38 14 46 22 46 32 C46 42 38 48 30 49 C22 48 14 42 14 32 C14 22 22 14 30 14Z" fill="url(#logoGradWeb)"/>
-        <ellipse cx="24" cy="20" rx="3" ry="5" fill="rgba(255,255,255,0.15)" transform="rotate(-20, 24, 20)"/>
-        <path d="M30 15 C33 8 38 5 42 8 C38 10 34 12 30 15Z" fill="#166534"/>
-        <text x="68" y="28" fill="#F8FAFC" font-weight="700" font-size="18" letter-spacing="1" font-family="'Segoe UI', Arial, sans-serif">KITCHEN</text>
-        <text x="68" y="46" fill="#F97316" font-weight="800" font-size="14" letter-spacing="3.5" font-family="'Segoe UI', Arial, sans-serif">GUARD</text>
-        <line x1="64" y1="14" x2="64" y2="50" stroke="#323B4E" stroke-width="1"/>
-        <circle cx="228" cy="30" r="4" fill="#10B981" opacity="0.9"/>
-      </svg>
-    </router-link>
-  </div>
-  
-  <!-- LINKS DE NAVEGACION -->
-  <div class="nav-center">
-    <router-link to="/dashboard" class="nav-item" active-class="nav-active">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-        <polyline points="9 22 9 12 15 12 15 22"/>
-      </svg>
-      <span>Inicio</span>
-    </router-link>
-    <router-link to="/timers" class="nav-item" active-class="nav-active">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="10"/>
-        <polyline points="12 6 12 12 16 14"/>
-      </svg>
-      <span>Timers</span>
-    </router-link>
-    <router-link to="/historial" class="nav-item" active-class="nav-active">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="10"/>
-        <polyline points="12 6 12 12 8 12"/>
-      </svg>
-      <span>Historial</span>
-    </router-link>
-    <router-link to="/graficas" class="nav-item" active-class="nav-active">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="10"/>
-        <polyline points="12 6 12 12 8 12"/>
-      </svg>
-      <span>Gráficas</span>
-    </router-link>
-  </div>
-
-
-  <!-- ESTADO + SALIR -->
-  <div class="nav-right">
-    <div class="status-indicator">
-      <span :class="['status-dot', connected ? 'online' : 'offline']"></span>
-      <span class="status-text">{{ connected ? 'Online' : 'Offline' }}</span>
-    </div>
-    <button @click="handleLogout" class="logout-btn">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-        <polyline points="16 17 21 12 16 7"/>
-        <line x1="21" y1="12" x2="9" y2="12"/>
-      </svg>
-      <span>Salir</span>
-    </button>
-  </div>
-</nav>
+    
+<NavBar :connected="connected" :dark="true" />
 
     <main class="main-content">
       <!-- Panel de Alertas Inteligentes -->
@@ -402,9 +328,10 @@
   Fuentes: SMN-CONAGUA · CICESE · Weather Spark · Climate-Data.org
   ============================================================
 */
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted} from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
+import NavBar from '../components/NavBar.vue'
 
 const router = useRouter()
 const { logout } = useAuth()
@@ -423,6 +350,9 @@ let chartInterval = null
 let eventInterval = null
 let statusInterval = null
 let climaInterval = null
+// var menu para engrane 
+const menuAbierto = ref(false)
+const configMenuRef = ref(null)
 
 // Sistema de Alertas
 const alertasActivas = ref([])
@@ -766,6 +696,13 @@ const actualizarGraficoGas = (ctx, width, height) => {
   for (let i=0;i<=100;i+=20) { const y = padding.top+chartHeight-(i/100*chartHeight); ctx.fillText(i+'%', padding.left-30, y+4) }
 }
 
+// Cerrar menú al hacer click fuera
+const cerrarMenuFuera = (e) => {
+  if (configMenuRef.value && !configMenuRef.value.contains(e.target)) {
+    menuAbierto.value = false
+  }
+}
+
 // API──────────────────────────────────────────────────
 const fetchStatus = async () => {
   try {
@@ -885,10 +822,6 @@ const descartarAlerta = async (alertaId) => {
 const formatTime = (t) => new Date(t).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'})
 const investigarEvento = (e) => console.log('Evento:', e)
 
-const handleLogout = async () => {  
-  await logout()
-  router.push('/login') 
-}
 
 const simularDatosEventos = () => {
   const tipos = ['Gas','Temperatura','Estufa','Sistema']
@@ -900,6 +833,7 @@ const simularDatosEventos = () => {
 // ─── Ciclo de vida ───────────────────────────────────────────
 let panicInterval = null 
 onMounted(() => {
+  document.addEventListener('click', cerrarMenuFuera)
   fetchStatus()
   fetchClimaExterior()
   statusInterval = setInterval(fetchStatus, 3000)
@@ -912,6 +846,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  document.removeEventListener('click', cerrarMenuFuera)
   clearInterval(statusInterval)
   clearInterval(chartInterval)
   clearInterval(eventInterval)
@@ -925,21 +860,16 @@ onUnmounted(() => {
 .dashboard{min-height:100vh;background:linear-gradient(135deg,#0a0a0a 0%,#1a1a1a 100%);color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
 .navbar{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:72px;background:rgba(26,26,26,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.1);position:sticky;top:0;z-index:100}
 .nav-brand{display:flex;align-items:center;gap:12px}
-.brand-icon{width:40px;height:40px;background:linear-gradient(135deg,#E63946,#ff6b6b);border-radius:12px;display:flex;align-items:center;justify-content:center;color:white}
-.brand-name{font-size:20px;font-weight:700;color:#fff;letter-spacing:-.5px}
-.brand-highlight{color:#E63946}
 .nav-center{display:flex;gap:8px}
 .nav-item{display:flex;align-items:center;gap:8px;padding:8px 20px;border-radius:12px;color:#999;text-decoration:none;font-size:14px;font-weight:500;transition:all .3s}
 .nav-item:hover{color:#fff;background:rgba(255,255,255,.05)}
-.nav-item-active{color:#fff;background:rgba(230,57,70,.15)}
+
 .nav-right{display:flex;align-items:center;gap:16px}
 .status-indicator{display:flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(255,255,255,.05);border-radius:12px;border:1px solid rgba(255,255,255,.1)}
 .status-dot{width:10px;height:10px;border-radius:50%}
 .status-dot.online{background:#30D158;box-shadow:0 0 12px rgba(48,209,88,.5)}
 .status-dot.offline{background:#FF3B30;box-shadow:0 0 12px rgba(255,59,48,.5)}
 .status-text{font-size:13px;color:#999}
-.logout-btn{display:flex;align-items:center;gap:8px;padding:8px 20px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;color:#999;font-size:14px;cursor:pointer;transition:all .3s}
-.logout-btn:hover{background:rgba(230,57,70,.1);color:#E63946;border-color:rgba(230,57,70,.3)}
 .main-content{padding:32px;max-width:1600px;margin:0 auto}
 .alerts-container{margin-bottom:24px;display:flex;flex-direction:column;gap:12px}
 .alert-card{display:flex;align-items:center;gap:16px;padding:16px 24px;border-radius:16px;border:1px solid;animation:slideIn .3s}
@@ -1186,6 +1116,87 @@ tr.warning td{background:rgba(255,149,0,.05)}
     flex-wrap: wrap;
     gap: 8px;
   }
+}
+
+.config-menu {
+  position: relative;
+}
+
+.config-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  color: #999;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.config-btn:hover, .config-btn.active {
+  color: #F97316;
+  border-color: rgba(249,115,22,0.3);
+  background: rgba(249,115,22,0.08);
+}
+
+.config-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  background: #1A1F2E;
+  border: 1px solid #262D3D;
+  border-radius: 14px;
+  padding: 8px;
+  min-width: 180px;
+  z-index: 200;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: #475569;
+}
+
+.dropdown-status { font-size: 12px; color: #475569; }
+
+.dropdown-divider {
+  height: 1px;
+  background: #262D3D;
+  margin: 4px 0;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  color: #94A3B8;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+}
+
+.dropdown-item:hover {
+  background: rgba(255,255,255,0.05);
+  color: #F8FAFC;
+}
+
+.dropdown-logout:hover {
+  background: rgba(239,68,68,0.08);
+  color: #EF4444;
 }
 
 @media(max-width:1200px){.monitoring-grid{grid-template-columns:1fr}}

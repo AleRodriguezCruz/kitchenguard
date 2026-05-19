@@ -6,6 +6,7 @@ import TimersView        from '../views/TimersView.vue'
 import HistorialView     from '../views/HistorialView.vue'
 import ResetPasswordView from '../views/ResetPasswordView.vue'
 import GraficaView from '../views/GraficaView.vue'
+import SetupView from '../views/SetupView.vue'
 
 const routes = [
   { path: '/', redirect: '/login' },
@@ -43,6 +44,12 @@ const routes = [
   path: '/graficas',
   name: 'graficas',
   component: GraficaView,
+  meta: { requiresAuth: true }
+},
+{
+  path: '/setup',
+  name: 'setup',
+  component: SetupView,
   meta: { requiresAuth: true }
 }
 ]

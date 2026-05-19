@@ -1,5 +1,7 @@
 <template>
+  
   <div class="setup-container">
+    
     <div class="setup-card">
       <!-- Logo -->
       <div class="setup-logo">

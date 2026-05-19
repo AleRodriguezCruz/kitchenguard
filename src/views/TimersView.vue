@@ -1,34 +1,7 @@
 <template>
   <div class="dashboard">
     <!-- Navbar (igual que Dashboard) -->
-    <nav class="navbar">
-      <router-link to="/dashboard" class="brand-link">
-        <div class="brand-logo-svg">
-          <svg width="150" height="42" viewBox="0 0 240 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="logoGradTimer" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#F97316"/>
-                <stop offset="100%" stop-color="#EA580C"/>
-              </linearGradient>
-            </defs>
-            <circle cx="30" cy="30" r="23" fill="#1A1F2E" stroke="#323B4E" stroke-width="1"/>
-            <circle cx="30" cy="30" r="20" fill="none" stroke="url(#logoGradTimer)" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.6"/>
-            <path d="M30 14 C38 14 46 22 46 32 C46 42 38 48 30 49 C22 48 14 42 14 32 C14 22 22 14 30 14Z" fill="url(#logoGradTimer)"/>
-            <text x="68" y="28" fill="#F8FAFC" font-weight="700" font-size="18" letter-spacing="1">KITCHEN</text>
-            <text x="68" y="46" fill="#F97316" font-weight="800" font-size="14" letter-spacing="3.5">GUARD</text>
-          </svg>
-        </div>
-      </router-link>
-      
-      <div class="nav-links">
-        <router-link to="/dashboard" class="nav-item">Inicio</router-link>
-        <router-link to="/timers" class="nav-item nav-active">Timers</router-link>
-        <router-link to="/historial" class="nav-item">Historial</router-link>
-        <router-link to="/graficas" class="nav-item" active-class="nav-active">Gráficas</router-link>
-      </div>
-      
-      <button @click="handleLogout" class="logout-btn">Salir</button>
-    </nav>
+    <NavBar :connected="connected" />
 
     <main class="main-content">
       <!-- Header de Timers -->
@@ -105,9 +78,11 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
+import NavBar from '../components/NavBar.vue' 
 
 const router = useRouter()
 const { logout } = useAuth()
+const connected = ref(false)
 
 const timers = ref([])
 const timerName = ref('')
@@ -115,6 +90,7 @@ const timerMin = ref('')
 const timerSec = ref('')
 const showForm = ref(false)
 let timerInterval = null
+let connectionInterval = null
 
 // Alarma sonora
 const playAlarm = () => {
@@ -175,7 +151,21 @@ const handleLogout = async () => {
   router.push('/login')
 }
 
+const fetchData = async () => {
+  try {
+    const res = await fetch('https://kitchenguard-api.onrender.com/api/sensor/live')
+    if (!res.ok) throw new Error()
+    const data = await res.json()
+    // Si el ESP está enviando datos, el objeto no estará vacío
+    connected.value = Object.keys(data).length > 0
+  } catch {
+    connected.value = false
+  }
+}
+
 onMounted(() => {
+  fetchData()
+  connectionInterval = setInterval(fetchData, 5000)
   timerInterval = setInterval(() => {
     timers.value = timers.value.map(t => {
       if (t.remaining > 0) {
@@ -197,68 +187,19 @@ onMounted(() => {
 onUnmounted(() => {
   clearInterval(timerInterval)
   stopAlarm()
+   clearInterval(connectionInterval)
 })
 </script>
 
 <style scoped>
-:root {
-  --bg: #0A0D14;
-  --surface: #111827;
-  --card: #1A1F2E;
-  --border: #262D3D;
-  --accent: #F97316;
-  --text: #F8FAFC;
-  --textSub: #94A3B8;
-  --textMuted: #475569;
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
 
 .dashboard {
   min-height: 100vh;
   background: #0A0D14;
   color: #F8FAFC;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
-
 .navbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 28px;
-  height: 64px;
-  background: rgba(17, 24, 39, 0.95);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid #262D3D;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.brand-link { text-decoration: none; display: flex; align-items: center; }
-.nav-links { display: flex; gap: 4px; }
-
-.nav-item {
-  padding: 8px 16px;
-  border-radius: 10px;
-  color: #94A3B8;
-  text-decoration: none;
-  font-size: 13px;
-  font-weight: 500;
-  transition: all .2s;
-}
-
-.nav-item:hover { color: #F8FAFC; background: rgba(255,255,255,.04); }
-.nav-active { color: #F97316; background: rgba(249,115,22,.1); }
-
-.logout-btn {
-  padding: 8px 16px;
-  background: rgba(239,68,68,.08);
-  border: 1px solid rgba(239,68,68,.25);
-  border-radius: 10px;
-  color: #EF4444;
-  font-size: 13px;
-  cursor: pointer;
+  background: rgba(17, 24, 39, 0.95);  /* ← este color gris azulado */
 }
 
 .main-content {
